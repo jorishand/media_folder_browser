@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Installation hooks for media folder browser module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function media_folder_browser_install() {
+  // Create field storage for the 'Parent folder' base field.
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $definition = $definition_update_manager->getFieldStorageDefinition('field_parent_folder', 'media');
+  $definition_update_manager->installFieldStorageDefinition($definition->getName(), $definition->getTargetEntityTypeId(), $definition->getProvider(), $definition);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function media_folder_browser_uninstall() {
+  // Delete field storage for the 'Parent folder' base field.
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $definition = $definition_update_manager->getFieldStorageDefinition('field_parent_folder', 'media');
+  $definition_update_manager->uninstallFieldStorageDefinition($definition);
+}

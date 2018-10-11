@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Provides an media entity browser with a folder structure.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function media_folder_browser_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+
+  // Add a 'Parent folder' base field to all selected media types.
+  if ($entity_type->id() === 'media') {
+
+    $fields['field_parent_folder'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Parent folder'))
+      ->setDescription(t('The parent folder of this entity.'))
+      ->setSetting('target_type', 'folder_entity')
+      ->setSetting('handler', 'default')
+      ->setDisplayOptions('form', [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 5,
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'autocomplete_type' => 'tags',
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('form', TRUE);
+  }
+
+  return $fields;
+}
