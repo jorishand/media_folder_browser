@@ -1,5 +1,6 @@
 name: 'Media Folder Browser'
 type: module
 description: 'A dynamic "folder" based media browser.'
-
 core: 8.x
+dependencies:
+  - drupal:media

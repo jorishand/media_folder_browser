@@ -21,18 +21,7 @@ function media_folder_browser_entity_base_field_info(EntityTypeInterface $entity
       ->setLabel(t('Parent folder'))
       ->setDescription(t('The parent folder of this entity.'))
       ->setSetting('target_type', 'folder_entity')
-      ->setSetting('handler', 'default')
-      ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
-        'settings' => [
-          'match_operator' => 'CONTAINS',
-          'size' => '60',
-          'autocomplete_type' => 'tags',
-          'placeholder' => '',
-        ],
-      ])
-      ->setDisplayConfigurable('form', TRUE);
+      ->setSetting('handler', 'default');
   }
 
   return $fields;
