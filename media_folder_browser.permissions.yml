@@ -1,0 +1,4 @@
+administer media folder browser:
+  title: 'Administer Media folder browser'
+  description: 'Allow to access the administration of Media folder browser.'
+  restrict access: true
