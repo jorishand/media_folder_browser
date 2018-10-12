@@ -49,6 +49,19 @@ class FolderEntity extends ContentEntityBase implements FolderEntityInterface {
   }
 
   /**
+   * Checks if folder has a parent.
+   *
+   * @return bool
+   *   Returns TRUE if a parent is set.
+   */
+  public function hasParent() {
+    if ($this->get('parent')->target_id) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getName() {
