@@ -163,7 +163,12 @@ class MediaFolderController extends ControllerBase {
       $this->recursiveDelete($childFolder->id());
     }
 
-    /* ToDo: Remove child media entities. */
+    // Remove child media entities.
+    $media_entities = $this->folderStructure->getFolderMediaChildren($folder_entity);
+    /** @var \Drupal\media\Entity\Media $media */
+    foreach ($media_entities as $media) {
+      $media->delete();
+    }
 
     // Remove directory from file system.
     $storage->delete([$folder_entity]);

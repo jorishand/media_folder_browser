@@ -41,4 +41,18 @@ class FolderStructureService {
     return $storage->loadByProperties(['parent' => $folder->id()]);
   }
 
+  /**
+   * Gets child media entities for a given folder.
+   *
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folder
+   *   The folder entity.
+   *
+   * @return array
+   *   The children.
+   */
+  public function getFolderMediaChildren(FolderEntity $folder) {
+    $storage = $this->entityTypeManager->getStorage('media');
+    return $storage->loadByProperties(['field_parent_folder' => $folder->id()]);
+  }
+
 }
