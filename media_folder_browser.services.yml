@@ -1,0 +1,4 @@
+services:
+  media_folder_browser.folder_structure:
+    class: Drupal\media_folder_browser\FolderStructureService
+    arguments: ['@entity_type.manager']

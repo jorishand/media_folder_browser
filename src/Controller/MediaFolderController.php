@@ -4,6 +4,7 @@ namespace Drupal\media_folder_browser\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\media_folder_browser\Entity\FolderEntity;
+use Drupal\media_folder_browser\FolderStructureService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
@@ -28,16 +29,26 @@ class MediaFolderController extends ControllerBase {
   protected $fileSystem;
 
   /**
+   * Folder structure service.
+   *
+   * @var \Drupal\media_folder_browser\FolderStructureService
+   */
+  protected $folderStructure;
+
+  /**
    * Constructs a new MediaFolderController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\File\FileSystem $file_system
    *   The file system.
+   * @param \Drupal\media_folder_browser\FolderStructureService $folder_structure_service
+   *   The folder structure service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service) {
     $this->entityTypeManager = $entity_type_manager;
     $this->fileSystem = $file_system;
+    $this->folderStructure = $folder_structure_service;
   }
 
   /**
@@ -46,7 +57,8 @@ class MediaFolderController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('file_system')
+      $container->get('file_system'),
+      $container->get('media_folder_browser.folder_structure')
     );
   }
 
@@ -75,6 +87,47 @@ class MediaFolderController extends ControllerBase {
     $this->fileSystem->mkdir($uri, NULL, TRUE);
 
     return $this->redirect('<front>');
+  }
+
+  /**
+   * Callback to delete a folder entity.
+   *
+   * @param int $folder_id
+   *   ID of the folder.
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   A redirect response.
+   */
+  public function removeFolder(int $folder_id = NULL) {
+    $this->recursiveDelete($folder_id);
+    return $this->redirect('<front>');
+  }
+
+  /**
+   * Remove a folder entity and its children recursively.
+   *
+   * @param int $folder_id
+   *   ID of the folder.
+   */
+  private function recursiveDelete(int $folder_id = NULL) {
+    $storage = $this->entityTypeManager->getStorage('folder_entity');
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
+    $folder_entity = $storage->load($folder_id);
+
+    $children = $this->folderStructure->getFolderChildren($folder_entity);
+
+    // Remove child folder entities.
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $childFolder */
+    foreach ($children as $childFolder) {
+      $this->recursiveDelete($childFolder->id());
+    }
+
+    /* ToDo: Remove child media entities. */
+
+    // Remove directory from file system.
+    $storage->delete([$folder_entity]);
+    $uri = $this->buildUri($folder_entity);
+    $this->fileSystem->rmdir($uri);
   }
 
   /**
