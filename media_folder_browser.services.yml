@@ -2,3 +2,6 @@ services:
   media_folder_browser.folder_structure:
     class: Drupal\media_folder_browser\FolderStructureService
     arguments: ['@entity_type.manager']
+  media_folder_browser.media_helper:
+    class: Drupal\media_folder_browser\MediaHelperService
+    arguments: ['@entity_type.manager']

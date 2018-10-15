@@ -5,6 +5,7 @@ namespace Drupal\media_folder_browser\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\media_folder_browser\Entity\FolderEntity;
 use Drupal\media_folder_browser\FolderStructureService;
+use Drupal\media_folder_browser\MediaHelperService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
@@ -36,6 +37,13 @@ class MediaFolderController extends ControllerBase {
   protected $folderStructure;
 
   /**
+   * Media helper service.
+   *
+   * @var \Drupal\media_folder_browser\MediaHelperService
+   */
+  protected $mediaHelper;
+
+  /**
    * Constructs a new MediaFolderController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -44,11 +52,14 @@ class MediaFolderController extends ControllerBase {
    *   The file system.
    * @param \Drupal\media_folder_browser\FolderStructureService $folder_structure_service
    *   The folder structure service.
+   * @param \Drupal\media_folder_browser\MediaHelperService $media_helper
+   *   The media helper service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper) {
     $this->entityTypeManager = $entity_type_manager;
     $this->fileSystem = $file_system;
     $this->folderStructure = $folder_structure_service;
+    $this->mediaHelper = $media_helper;
   }
 
   /**
@@ -58,7 +69,8 @@ class MediaFolderController extends ControllerBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('file_system'),
-      $container->get('media_folder_browser.folder_structure')
+      $container->get('media_folder_browser.folder_structure'),
+      $container->get('media_folder_browser.media_helper')
     );
   }
 
@@ -104,6 +116,35 @@ class MediaFolderController extends ControllerBase {
   }
 
   /**
+   * Callback to move a media entity to a different folder.
+   *
+   * @param int $media_id
+   *   ID of the media entity.
+   * @param int $folder_id
+   *   ID of the folder.
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   A redirect response.
+   */
+  public function moveMedia(int $media_id, int $folder_id) {
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+    if ($folder = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id)) {
+      /** @var \Drupal\media\Entity\Media $media */
+      if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
+        $file = $this->mediaHelper->getMediaFile($media);
+        $dest = $this->buildUri($folder) . '/' . $file->getFilename();
+        $moved_file = file_move($file, $dest);
+        if ($moved_file) {
+          $media->set('field_parent_folder', $folder_id);
+          $media->save();
+        }
+      }
+    }
+    // ToDo: error responses and watchdog warnings.
+    return $this->redirect('<front>');
+  }
+
+  /**
    * Remove a folder entity and its children recursively.
    *
    * @param int $folder_id
@@ -142,7 +183,7 @@ class MediaFolderController extends ControllerBase {
    *   The URI.
    */
   private function buildUri(FolderEntity $folderEntity, string $uri = '') {
-    $uri = empty($uri) ?: '/' . $uri;
+    $uri = empty($uri) ? '' : '/' . $uri;
     $uri = $folderEntity->getName() . $uri;
 
     if ($folderEntity->hasParent()) {
