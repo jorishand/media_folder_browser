@@ -75,6 +75,62 @@ class MediaFolderController extends ControllerBase {
   }
 
   /**
+   * Renders the browser.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function renderBrowser() {
+    $element = [
+      '#theme' => 'folder_browser_overview',
+      '#results' => $this->getFolderContents(1),
+    ];
+    return $element;
+  }
+
+  /**
+   * Gets child folders and media for a specific folder as a renderable array.
+   *
+   * @param int $folder_id
+   *   ID of the folder.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function getFolderContents(int $folder_id) {
+    $results = [];
+
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
+    $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load(1);
+    if ($folder_entity) {
+      $folders = $this->folderStructure->getFolderChildren($folder_entity);
+      $media = $this->folderStructure->getFolderMediaChildren($folder_entity);
+
+      // Add child folders to results.
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+      foreach ($folders as $folder) {
+        $results = [
+          '#theme' => 'folder_browser_folder_item',
+          '#id' => $folder->id(),
+          '#name' => $folder->getName(),
+        ];
+      }
+
+      // Add child media entities to results.
+      /** @var \Drupal\media\Entity\Media $media_item */
+      foreach ($media as $media_item) {
+        $results[] = [
+          '#theme' => 'folder_browser_media_item',
+          '#id' => $media_item->id(),
+          '#name' => $media_item->getName(),
+        ];
+      }
+    }
+
+    return $results;
+  }
+
+  /**
    * Creates a new folder entity.
    *
    * @param string $name

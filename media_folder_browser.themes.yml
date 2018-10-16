@@ -1,0 +1,17 @@
+folder_browser_overview:
+  template: 'folder-browser-overview'
+  variables:
+    results: []
+
+folder_browser_folder_item:
+  template: 'folder-browser-folder-item'
+  variables:
+    id: NULL
+    name: ''
+
+folder_browser_media_item:
+  template: 'folder-browser-media-item'
+  variables:
+    id: NULL
+    name: ''
+    image_url: ''
