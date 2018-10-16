@@ -83,6 +83,7 @@ class MediaFolderController extends ControllerBase {
   public function renderBrowser() {
     $element = [
       '#theme' => 'folder_browser_overview',
+      '#sidebar_folders' => $this->getFolderTree(),
       '#results' => $this->getFolderContents(1),
     ];
     return $element;
@@ -101,7 +102,7 @@ class MediaFolderController extends ControllerBase {
     $results = [];
 
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
-    $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load(1);
+    $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id);
     if ($folder_entity) {
       $folders = $this->folderStructure->getFolderChildren($folder_entity);
       $media = $this->folderStructure->getFolderMediaChildren($folder_entity);
@@ -128,6 +129,52 @@ class MediaFolderController extends ControllerBase {
     }
 
     return $results;
+  }
+
+  /**
+   * Gets the folder tree as a renderable array.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function getFolderTree() {
+    // Load first level folders.
+    $root_folders = $this->folderStructure->getRootFolders();
+
+    $children = [];
+    foreach ($root_folders as $folder) {
+      $children[] = $this->getFolderTreeItem($folder);
+    }
+
+    return [
+      '#theme' => 'folder_browser_folder_tree',
+      '#children' => $children,
+    ];
+  }
+
+  /**
+   * Recursive function to prepare a folder tree render array.
+   *
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folder
+   *   Folder entity.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function getFolderTreeItem(FolderEntity $folder) {
+    $child_folders = $this->folderStructure->getFolderChildren($folder);
+
+    $children = [];
+    foreach ($child_folders as $child_folder) {
+      $children[] = $this->getFolderTreeItem($child_folder);
+    }
+
+    return [
+      '#theme' => 'folder_browser_folder_tree_item',
+      '#name' => $folder->getName(),
+      '#id' => $folder->id(),
+      '#children' => $children,
+    ];
   }
 
   /**

@@ -1,6 +1,7 @@
 folder_browser_overview:
   template: 'folder-browser-overview'
   variables:
+    sidebar_folders: []
     results: []
 
 folder_browser_folder_item:
@@ -15,3 +16,15 @@ folder_browser_media_item:
     id: NULL
     name: ''
     image_url: ''
+
+folder_browser_folder_tree:
+  template: 'folder-browser-folder-tree'
+  variables:
+    children: []
+
+folder_browser_folder_tree_item:
+  template: 'folder-browser-folder-tree-item'
+  variables:
+    id: NULL
+    name: ''
+    children: []
