@@ -1,6 +1,14 @@
-<li>
-  <a href="#" class="js-tree-item" data-id="{{ id }}">{{ name }}</a>
-  <ul>
-    {{ children }}
-  </ul>
+{%
+set classes = [
+  'mfb-sidebar__list-item',
+  children is not empty ? 'sub-dir',
+]
+%}
+<li{{ attributes.addClass(classes) }}>
+  <a href="#" class="menu-link js-tree-item" data-id="{{ id }}">{{ name }}</a>
+  {% if children is not empty %}
+    <ul class="mfb-sidebar__list-item__list">
+      {{ children }}
+    </ul>
+  {% endif %}
 </li>

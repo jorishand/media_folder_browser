@@ -1,0 +1,123 @@
+//
+// @file
+// Experimental mfb browser CSS.
+//
+
+@import "variables";
+
+.media-folder-browser {
+  display: flex;
+  height: 100%;
+}
+
+.mfb-sidebar {
+  flex: 2;
+  background-color: $grey-dark;
+  font-size: 14px;
+
+  &__list {
+    position: relative;
+    margin: 0;
+    padding: 15px 0 10px 25px;
+    list-style: none;
+
+    > .mfb-sidebar__list-item::after {
+      display: none;
+    }
+  }
+
+  &__list-item {
+    display: block;
+    position: relative;
+
+    &::after {
+      display: block;
+      position: absolute;
+      top: -9px;
+      left: -10px;
+      width: 0;
+      height: 25px;
+      border-left: 1px solid #7a7f87;
+      content: "";
+    }
+
+    &__list {
+      position: relative;
+      margin: 0;
+      padding: 0 0 0 16px;
+      list-style: none;
+
+      .mfb-sidebar__list-item::before {
+        display: block;
+        position: absolute;
+        top: 16px;
+        left: -10px;
+        width: 20px;
+        height: 0;
+        border-bottom: 1px solid #7a7f87;
+        content: "";
+      }
+
+      &::before {
+        position: absolute;
+        top: -9px;
+        bottom: 25px;
+        left: 6px;
+        border-left: 1px dashed #373e4b;
+        content: "";
+      }
+    }
+  }
+
+  .sub-dir {
+    &.open > .menu-link::before {
+      transform: rotate(45deg);
+    }
+
+    > .menu-link::before {
+      position: absolute;
+      top: 14px;
+      left: 4px;
+      width: 5px;
+      height: 5px;
+      transform: rotate(-45deg);
+      border-right: 1px solid #fff;
+      border-bottom: 1px solid #fff;
+      content: "";
+    }
+
+    .mfb-sidebar__list-item__list {
+      margin-top: -5px;
+    }
+
+    &::before {
+      width: 7px;
+    }
+  }
+
+  .menu-link {
+    display: block;
+    position: relative;
+    height: 29px;
+    padding: 6px 18px;
+    transition: 100ms;
+    border-bottom: none;
+    color: $grey-light;
+    text-decoration: none;
+
+    &.selected {
+      color: $white;
+    }
+
+    &:hover {
+      border-bottom: none;
+      color: $white;
+    }
+  }
+}
+
+.mfb-overview {
+  flex: 5;
+  padding: 10px;
+  background-color: $white;
+}

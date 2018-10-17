@@ -5,6 +5,7 @@
     attach: function (context) {
       $('.js-tree-item', context).click(function (e) {
         e.preventDefault();
+        $('.selected').removeClass('selected');
         $(this).addClass('selected');
         refreshResults($(this).attr("data-id"));
       });
