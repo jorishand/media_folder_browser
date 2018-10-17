@@ -1,0 +1,7 @@
+browser:
+  js:
+    js/media_folder_browser.js: {}
+  dependencies:
+      - core/jquery
+      - core/jquery.once
+      - core/drupal

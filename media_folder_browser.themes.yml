@@ -17,6 +17,11 @@ folder_browser_media_item:
     name: ''
     image_url: ''
 
+folder_browser_folder_results:
+  template: 'folder-browser-folder-results'
+  variables:
+    results: []
+
 folder_browser_folder_tree:
   template: 'folder-browser-folder-tree'
   variables:

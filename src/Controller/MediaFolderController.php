@@ -2,13 +2,17 @@
 
 namespace Drupal\media_folder_browser\Controller;
 
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\Renderer;
 use Drupal\media_folder_browser\Entity\FolderEntity;
 use Drupal\media_folder_browser\FolderStructureService;
 use Drupal\media_folder_browser\MediaHelperService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
+use Drupal\Core\Ajax\AjaxResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides route responses for media folders.
@@ -44,6 +48,13 @@ class MediaFolderController extends ControllerBase {
   protected $mediaHelper;
 
   /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\Renderer
+   */
+  protected $renderer;
+
+  /**
    * Constructs a new MediaFolderController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -54,12 +65,15 @@ class MediaFolderController extends ControllerBase {
    *   The folder structure service.
    * @param \Drupal\media_folder_browser\MediaHelperService $media_helper
    *   The media helper service.
+   * @param \Drupal\Core\Render\Renderer $renderer
+   *   The renderer.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer) {
     $this->entityTypeManager = $entity_type_manager;
     $this->fileSystem = $file_system;
     $this->folderStructure = $folder_structure_service;
     $this->mediaHelper = $media_helper;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -70,7 +84,8 @@ class MediaFolderController extends ControllerBase {
       $container->get('entity_type.manager'),
       $container->get('file_system'),
       $container->get('media_folder_browser.folder_structure'),
-      $container->get('media_folder_browser.media_helper')
+      $container->get('media_folder_browser.media_helper'),
+      $container->get('renderer')
     );
   }
 
@@ -85,8 +100,27 @@ class MediaFolderController extends ControllerBase {
       '#theme' => 'folder_browser_overview',
       '#sidebar_folders' => $this->getFolderTree(),
       '#results' => $this->getFolderContents(1),
+      '#attached' => ['library' => ['media_folder_browser/browser']],
     ];
     return $element;
+  }
+
+  /**
+   * Callback to refresh the overview results.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Ajax response.
+   */
+  public function refreshResults(Request $request) {
+    $response = new AjaxResponse();
+    $folder_id = $request->query->get('id');
+
+    $results = $this->getFolderContents($folder_id);
+    $results = $this->renderer->render($results);
+
+    $response->addCommand(new ReplaceCommand('.js-results-wrapper', $results));
+
+    return $response;
   }
 
   /**
@@ -128,7 +162,10 @@ class MediaFolderController extends ControllerBase {
       }
     }
 
-    return $results;
+    return [
+      '#theme' => 'folder_browser_folder_results',
+      '#results' => $results,
+    ];
   }
 
   /**

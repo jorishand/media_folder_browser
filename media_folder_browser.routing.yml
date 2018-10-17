@@ -38,3 +38,10 @@ folder_browser.view:
     _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::renderBrowser'
   requirements:
     _permission: 'administer media folder browser'
+
+folder_browser.refresh:
+  path: '/media-folder-browser/overview/refresh'
+  defaults:
+    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::refreshResults'
+  requirements:
+    _permission: 'administer media folder browser'
