@@ -23,12 +23,12 @@ folder_browser_folder_results:
     results: []
 
 folder_browser_folder_tree:
-  template: 'folder-browser-folder-tree'
+  template: 'sidebar/folder-browser-folder-tree'
   variables:
     children: []
 
 folder_browser_folder_tree_item:
-  template: 'folder-browser-folder-tree-item'
+  template: 'sidebar/folder-browser-folder-tree-item'
   variables:
     id: NULL
     name: ''
