@@ -6,5 +6,6 @@ browser:
   css:
     theme:
       css/mfb.browser.css: {}
+      css/mfb.sidebar.css: {}
   js:
     js/media_folder_sidebar.js: {}
