@@ -28,6 +28,22 @@ class FolderStructureService {
   }
 
   /**
+   * Gets folder entities that have no parent.
+   *
+   * @return array
+   *   The folders.
+   */
+  public function getRootFolders() {
+    $storage = $this->entityTypeManager->getStorage('folder_entity');
+
+    $nids = \Drupal::entityQuery('folder_entity')
+      ->notExists('parent')
+      ->execute();
+
+    return $storage->loadMultiple($nids);
+  }
+
+  /**
    * Gets child folder entities for a given folder.
    *
    * @param \Drupal\media_folder_browser\Entity\FolderEntity $folder

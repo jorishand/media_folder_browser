@@ -1,0 +1,10 @@
+browser:
+  dependencies:
+      - core/jquery
+      - core/jquery.once
+      - core/drupal
+  css:
+    theme:
+      css/mfb.browser.css: {}
+  js:
+    js/media_folder_browser.js: {}
