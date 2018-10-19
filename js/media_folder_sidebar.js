@@ -60,8 +60,8 @@
    */
   Drupal.behaviors.sidebarCollapse = {
     attach: function (context) {
-      $('.sub-dir > a', context).click(function() {
-        var $parent = $(this).parent('.sub-dir');
+      $('.js-dropdown', context).click(function() {
+        var $parent = $(this).parent().parent('.sub-dir');
         var heightOffset = 0;
 
         if ($parent.hasClass('collapsed')) {

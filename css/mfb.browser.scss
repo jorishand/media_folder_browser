@@ -10,6 +10,19 @@
   height: 100%;
 }
 
+.folder-icon {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  transition: all 0.2s ease-in-out;
+  background-image: url(../icons/folder-stroke.svg);
+  background-repeat: no-repeat;
+}
+
+.selected .folder-icon {
+  background-image: url(../icons/folder-filled.svg);
+}
+
 .mfb-sidebar {
   flex: 2;
   background-color: $grey-dark;
@@ -36,14 +49,19 @@
       top: -25px;
       left: -10px;
       width: 0;
-      height: 42px;
+      height: 45px;
       border-left: 1px solid #7a7f87;
       content: "";
     }
 
     &:first-child::after {
       top: 0;
-      height: 17px;
+      height: 20px;
+    }
+
+    &__folder {
+      display: flex;
+      align-items: center;
     }
 
     &__list {
@@ -55,7 +73,7 @@
       .mfb-sidebar__list-item::before {
         display: block;
         position: absolute;
-        top: 16px;
+        top: 20px;
         left: -10px;
         width: 20px;
         height: 0;
@@ -75,27 +93,22 @@
   }
 
   .sub-dir {
-    &.collapsed > .menu-link::before {
+    &.collapsed .dropdown-container__arrow {
       transform: rotate(-45deg);
-    }
-
-    > .menu-link::before {
-      position: absolute;
-      top: 14px;
-      left: 4px;
-      width: 5px;
-      height: 5px;
-      transform: rotate(45deg);
-      transition: transform 0.2s ease-out;
-      border-right: 1px solid #fff;
-      border-bottom: 1px solid #fff;
-      content: "";
     }
 
     .mfb-sidebar__list-item__list {
       margin-top: -5px;
-      transition: max-height 0.2s ease-in-out;
+      transform: scaleY(1);
+      transform-origin: top center;
+      transition: all 0.2s ease-in-out;
+      opacity: 1;
       overflow: hidden;
+    }
+
+    &.collapsed .mfb-sidebar__list-item__list {
+      transform: scaleY(0);
+      opacity: 0;
     }
 
     &::before {
@@ -103,18 +116,46 @@
     }
   }
 
+  .dropdown-container {
+    display: flex;
+    position: absolute;
+    top: 14px;
+    left: 4px;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+
+    &__arrow {
+      width: 5px;
+      height: 5px;
+      transform: rotate(45deg);
+      transition: transform 0.2s ease-out;
+      border-right: 1px solid #fff;
+      border-bottom: 1px solid #fff;
+    }
+  }
+
   .menu-link {
-    display: block;
+    display: flex;
     position: relative;
+    align-items: center;
     height: 29px;
-    padding: 6px 18px;
+    margin-left: 22px;
+    padding: 6px 0;
     transition: 100ms;
     border-bottom: none;
-    color: $grey-light;
+    color: $white;
     text-decoration: none;
+    opacity: 0.8;
+
+    &__title {
+      margin-left: 8px;
+    }
 
     &.selected {
-      color: $white;
+      opacity: 1;
     }
 
     &:hover {

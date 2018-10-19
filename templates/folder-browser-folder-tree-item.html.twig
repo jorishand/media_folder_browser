@@ -1,12 +1,25 @@
 {%
-set classes = [
-  'mfb-sidebar__list-item',
-  children is not empty ? 'sub-dir collapsed',
-]
+  set children_set = children is not empty
+%}
+{%
+  set classes = [
+    'mfb-sidebar__list-item',
+    children_set ? 'sub-dir collapsed',
+  ]
 %}
 <li{{ attributes.addClass(classes) }}>
-  <a href="#" class="menu-link js-tree-item" data-id="{{ id }}">{{ name }}</a>
-  {% if children is not empty %}
+  <div class="mfb-sidebar__list-item__folder">
+    {% if children_set %}
+      <div class="dropdown-container js-dropdown">
+        <i class="dropdown-container__arrow"></i>
+      </div>
+    {% endif %}
+    <a href="#" class="menu-link js-tree-item" data-id="{{ id }}">
+      <i class="folder-icon"></i>
+      <span class="menu-link__title">{{ name }}</span>
+    </a>
+  </div>
+  {% if children_set %}
     <ul class="mfb-sidebar__list-item__list">
       {{ children }}
     </ul>
