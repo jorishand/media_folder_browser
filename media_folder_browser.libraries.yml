@@ -7,4 +7,4 @@ browser:
     theme:
       css/mfb.browser.css: {}
   js:
-    js/media_folder_browser.js: {}
+    js/media_folder_sidebar.js: {}

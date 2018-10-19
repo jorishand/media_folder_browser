@@ -34,12 +34,17 @@
 .mfb-sidebar__list-item::after {
   display: block;
   position: absolute;
-  top: -9px;
+  top: -25px;
   left: -10px;
   width: 0;
-  height: 25px;
+  height: 42px;
   border-left: 1px solid #7a7f87;
   content: "";
+}
+
+.mfb-sidebar__list-item:first-child::after {
+  top: 0;
+  height: 17px;
 }
 
 .mfb-sidebar__list-item__list {
@@ -62,16 +67,16 @@
 
 .mfb-sidebar__list-item__list::before {
   position: absolute;
-  top: -9px;
+  top: 0;
   bottom: 25px;
   left: 6px;
   border-left: 1px dashed #373e4b;
   content: "";
 }
 
-.mfb-sidebar .sub-dir.open > .menu-link::before {
-  -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
+.mfb-sidebar .sub-dir.collapsed > .menu-link::before {
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
 }
 
 .mfb-sidebar .sub-dir > .menu-link::before {
@@ -80,8 +85,12 @@
   left: 4px;
   width: 5px;
   height: 5px;
-  -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  -webkit-transition: -webkit-transform 0.2s ease-out;
+  transition: -webkit-transform 0.2s ease-out;
+  transition: transform 0.2s ease-out;
+  transition: transform 0.2s ease-out, -webkit-transform 0.2s ease-out;
   border-right: 1px solid #fff;
   border-bottom: 1px solid #fff;
   content: "";
@@ -89,6 +98,9 @@
 
 .mfb-sidebar .sub-dir .mfb-sidebar__list-item__list {
   margin-top: -5px;
+  -webkit-transition: max-height 0.2s ease-in-out;
+  transition: max-height 0.2s ease-in-out;
+  overflow: hidden;
 }
 
 .mfb-sidebar .sub-dir::before {

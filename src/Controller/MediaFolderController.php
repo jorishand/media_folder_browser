@@ -144,7 +144,7 @@ class MediaFolderController extends ControllerBase {
       // Add child folders to results.
       /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
       foreach ($folders as $folder) {
-        $results = [
+        $results[] = [
           '#theme' => 'folder_browser_folder_item',
           '#id' => $folder->id(),
           '#name' => $folder->getName(),

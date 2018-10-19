@@ -33,12 +33,17 @@
     &::after {
       display: block;
       position: absolute;
-      top: -9px;
+      top: -25px;
       left: -10px;
       width: 0;
-      height: 25px;
+      height: 42px;
       border-left: 1px solid #7a7f87;
       content: "";
+    }
+
+    &:first-child::after {
+      top: 0;
+      height: 17px;
     }
 
     &__list {
@@ -60,7 +65,7 @@
 
       &::before {
         position: absolute;
-        top: -9px;
+        top: 0;
         bottom: 25px;
         left: 6px;
         border-left: 1px dashed #373e4b;
@@ -70,8 +75,8 @@
   }
 
   .sub-dir {
-    &.open > .menu-link::before {
-      transform: rotate(45deg);
+    &.collapsed > .menu-link::before {
+      transform: rotate(-45deg);
     }
 
     > .menu-link::before {
@@ -80,7 +85,8 @@
       left: 4px;
       width: 5px;
       height: 5px;
-      transform: rotate(-45deg);
+      transform: rotate(45deg);
+      transition: transform 0.2s ease-out;
       border-right: 1px solid #fff;
       border-bottom: 1px solid #fff;
       content: "";
@@ -88,6 +94,8 @@
 
     .mfb-sidebar__list-item__list {
       margin-top: -5px;
+      transition: max-height 0.2s ease-in-out;
+      overflow: hidden;
     }
 
     &::before {
