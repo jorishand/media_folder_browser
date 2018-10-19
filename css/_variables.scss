@@ -1,8 +1,10 @@
-// Colours.
+// Colors.
 
 $white: #fff !default;
-$grey-dark: #222a38 !default;
-$grey-light: #bbb !default;
+
+$sidebar-back-color: #222a38 !default;
+$sidebar-light-grey: #7a7f87 !default;
+$sidebar-dark-grey: #373e4b !default;
 
 // Layout.
 
@@ -13,6 +15,3 @@ $grid-breakpoints: (
   lg: 992px,
   xl: 1200px
 ) !default;
-
-// Gutter value for top widget section.
-$gutter-top: 5px !default;
