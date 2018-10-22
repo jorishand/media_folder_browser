@@ -31,7 +31,6 @@
           ajaxObject.success(data, 'success');
         });
       }
-
     }
   };
 
@@ -49,6 +48,10 @@
           });
           var collapsed_height = parseInt($(this).prop('scrollHeight')) - child_heights;
           $(this).attr('data-height', collapsed_height);
+        });
+      });
+      $('.sub-dir', context).each(function() {
+        $(this).find('ul').each(function() {
           $(this).css('max-height', 0);
         });
       });

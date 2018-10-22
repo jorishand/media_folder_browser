@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 94.1 75.1" style="enable-background:new 0 0 94.1 75.1;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:url(#SVGID_1_);}
+	.st1{fill:#EFCE4A;}
+</style>
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="47.05" y1="0" x2="47.05" y2="75.1">
+	<stop  offset="0.2192" style="stop-color:#EBB918"/>
+	<stop  offset="0.2894" style="stop-color:#DEAF17"/>
+</linearGradient>
+<path class="st0" d="M39.9,10.6c-2.9,0-5.7-1.2-7.8-3.2l-6.3-6.3C25.1,0.4,24.1,0,23.1,0H3.9C1.8,0,0,1.7,0,3.9v67.3
+	c0,2.1,1.7,3.9,3.9,3.9h86.3c2.1,0,3.9-1.7,3.9-3.9V14.5c0-2.1-1.7-3.9-3.9-3.9H39.9z"/>
+<path class="st1" d="M5.4,22.6C2.4,22.6,0,25,0,28v43.2c0,2.1,1.7,3.9,3.9,3.9h86.3c2.1,0,3.9-1.7,3.9-3.9V28c0-3-2.4-5.4-5.4-5.4
+	H5.4z"/>
+</svg>

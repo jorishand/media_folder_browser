@@ -1,10 +1,21 @@
 // Colors.
 
 $white: #fff !default;
+$black: #000 !default;
 
-$sidebar-back-color: #222a38 !default;
-$sidebar-light-grey: #7a7f87 !default;
-$sidebar-dark-grey: #373e4b !default;
+$sidebar-back-color: #383838 !default;
+$sidebar-light-grey: #848484 !default;
+$sidebar-medium-grey: #727272 !default;
+$sidebar-dark-grey: #191919 !default;
+
+$shadow-light: rgba(0, 0, 0, 0.1) !default;
+$shadow-dark: rgba(0, 0, 0, 0.3) !default;
+
+// Weights
+
+$weight-semi-bold: 500 !default;
+$weight-bold: 700 !default;
+
 
 // Layout.
 

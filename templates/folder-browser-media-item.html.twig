@@ -1,6 +1,11 @@
-<li>
-  <a href="#" data-id="{{ id }}">
-    {{ image_url }}
-    {{ name }}
-  </a>
-</li>
+<a href="#" data-id="{{ id }}" class="overview-item overview-item__media">
+  <img src="{{ thumbnail }}" class="overview-item__media__image" alt="folder">
+  <div class="overview-item__media__info">
+    <i style="background-image: url('{{ icon }}')" class="info_icon"></i>
+    <div class="info_details">
+      <span class="info_details__name">{{ name }}</span>
+      <span class="info_details__size">{{ size }}</span>
+      <span class="info_details__type">{{ type }}</span>
+    </div>
+  </div>
+</a>
