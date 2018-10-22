@@ -8,10 +8,137 @@
 .media-folder-browser {
   display: flex;
   height: 100%;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .mfb-overview {
   flex: 5;
-  padding: 10px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  background-color: $sidebar-back-color;
+
+  &__current-folder {
+    margin-left: 10px;
+    color: $white;
+    font-size: 16pt;
+  }
+}
+
+.overview-container {
+  display: grid;
+  padding: 15px 0 0 15px;
   background-color: $white;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  grid-auto-rows: 1fr;
+  grid-gap: 15px;
+
+  > .overview-item:first-child {
+    grid-row: 1 / 1;
+    grid-column: 1 / 1;
+  }
+
+  &::before {
+    width: 0;
+    padding-bottom: 100%;
+    grid-row: 1 / 1;
+    grid-column: 1 / 1;
+    content: "";
+  }
+}
+
+.overview-item {
+  position: relative;
+  border: none;
+  color: $black;
+  text-decoration: none;
+  overflow: hidden;
+
+  &:hover,
+  &:active,
+  &:focus {
+    border: none;
+    color: $black;
+  }
+
+  &__folder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &__image {
+      width: 80%;
+    }
+
+    &__label {
+      margin-top: 5px;
+      color: $sidebar-dark-grey;
+      font-weight: $weight-semi-bold;
+    }
+  }
+
+  &__media {
+    transition: 0.3s;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 $shadow-light;
+
+    &:hover,
+    &:active {
+      box-shadow: 0 4px 8px 0 $shadow-dark;
+
+      .overview-item__media__info {
+        height: 55px;
+      }
+
+      .info_details__size,
+      .info_details__type {
+        opacity: 1;
+      }
+    }
+
+    &__info {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 27px;
+      padding-top: 5px;
+      transition: height 0.2s ease-in-out;
+      background-color: $white;
+    }
+
+    .info_icon {
+      display: block;
+      width: 26%;
+      height: 20px;
+      margin-left: 4%;
+      float: left;
+      background: no-repeat center center;
+      background-size: 16px;
+    }
+
+    .info_details {
+      width: 70%;
+      float: right;
+      color: $sidebar-dark-grey;
+      line-height: 16px;
+
+      &__name {
+        display: block;
+        margin-top: 2px;
+        font-weight: $weight-semi-bold;
+      }
+
+      &__size,
+      &__type {
+        display: block;
+        transition: opacity 0.2s ease-in-out;
+        opacity: 0;
+      }
+    }
+  }
 }

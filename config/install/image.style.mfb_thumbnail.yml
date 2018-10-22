@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: mfb_thumbnail
+label: 'MFB Thumbnail'
+effects:
+  37ecc78e-7c73-4f95-a697-cd35940dcf88:
+    uuid: 37ecc78e-7c73-4f95-a697-cd35940dcf88
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 200
+      height: 200
+      anchor: center-center

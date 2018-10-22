@@ -14,8 +14,11 @@ folder_browser_media_item:
   template: 'folder-browser-media-item'
   variables:
     id: NULL
+    icon: ''
     name: ''
-    image_url: ''
+    size: ''
+    type: ''
+    thumbnail: ''
 
 folder_browser_folder_results:
   template: 'folder-browser-folder-results'

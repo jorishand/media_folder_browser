@@ -2,9 +2,11 @@
 
 namespace Drupal\media_folder_browser\Controller;
 
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Renderer;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\media_folder_browser\Entity\FolderEntity;
 use Drupal\media_folder_browser\FolderStructureService;
 use Drupal\media_folder_browser\MediaHelperService;
@@ -118,7 +120,11 @@ class MediaFolderController extends ControllerBase {
     $results = $this->getFolderContents($folder_id);
     $results = $this->renderer->render($results);
 
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
+    $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id);
+
     $response->addCommand(new ReplaceCommand('.js-results-wrapper', $results));
+    $response->addCommand(new HtmlCommand('.js-current-folder', $folder_entity->getName()));
 
     return $response;
   }
@@ -154,10 +160,40 @@ class MediaFolderController extends ControllerBase {
       // Add child media entities to results.
       /** @var \Drupal\media\Entity\Media $media_item */
       foreach ($media as $media_item) {
+        $thumbnail = ImageStyle::load('mfb_thumbnail')->buildUrl($media_item->get('thumbnail')[0]->entity->uri->value);
+
+        // ToDo: make this configurable in a config form.
+        // Set icon based on media type.
+        switch ($media_item->bundle()) {
+          case 'image':
+            $icon = '/icons/photo-camera.svg';
+            break;
+
+          case 'video':
+          case 'remote_video':
+            $icon = '/icons/play-button-on-film-strip.svg';
+            break;
+
+          case 'audio':
+            $icon = '/icons/radio-microphone.svg';
+            break;
+
+          default:
+            $icon = '/icons/text-and-image-document.svg';
+            break;
+        }
+        $icon = base_path() . drupal_get_path('module', 'media_folder_browser') . $icon;
+        $file = $this->mediaHelper->getMediaFile($media_item);
+        $size = $file->getSize();
+        $type = $file->getMimeType();
         $results[] = [
           '#theme' => 'folder_browser_media_item',
           '#id' => $media_item->id(),
+          '#icon' => $icon,
           '#name' => $media_item->getName(),
+          '#size' => format_size($size),
+          '#type' => $type,
+          '#thumbnail' => $thumbnail,
         ];
       }
     }
