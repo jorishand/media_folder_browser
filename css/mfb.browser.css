@@ -8,6 +8,7 @@
 }
 
 .mfb-overview {
+  position: relative;
   -webkit-box-flex: 5;
   -webkit-flex: 5;
       -ms-flex: 5;
@@ -31,7 +32,7 @@
 .search-bar__current-folder {
   margin-left: 10px;
   color: #fff;
-  font-size: 16pt;
+  font-size: 16px;
 }
 
 .overview-container {
@@ -167,4 +168,26 @@
   -webkit-transition: opacity 0.2s ease-in-out;
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
+}
+
+.loader-container {
+  position: absolute;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  height: calc(100% - 50px);
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.hidden {
+  display: none;
 }

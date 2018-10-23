@@ -15,6 +15,8 @@
         e.preventDefault();
         $('.selected').removeClass('selected');
         $(this).addClass('selected');
+        $('.js-current-folder').html($(this).children('span').html());
+        $('.loader-container').removeClass('hidden');
         refreshResults($(this).attr("data-id"));
       });
 
