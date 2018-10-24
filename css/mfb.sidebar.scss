@@ -96,16 +96,14 @@
 
     .mfb-sidebar__list-item__list {
       margin-top: -5px;
-      transform: scaleY(1);
-      transform-origin: top center;
       transition: all 0.2s ease-in-out;
       opacity: 1;
       overflow: hidden;
     }
 
-    &.collapsed .mfb-sidebar__list-item__list {
-      transform: scaleY(0);
+    &.collapsed > .mfb-sidebar__list-item__list {
       opacity: 0;
+      max-height: 0;
     }
 
     &::before {
@@ -145,7 +143,7 @@
     border-bottom: none;
     color: $white;
     text-decoration: none;
-    opacity: 0.8;
+    opacity: 0.7;
 
     &__title {
       margin-left: 8px;
@@ -158,6 +156,7 @@
     &:hover {
       border-bottom: none;
       color: $white;
+      opacity: 1;
     }
   }
 }
