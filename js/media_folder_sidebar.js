@@ -98,6 +98,10 @@
         else {
           $(this).addClass('selected');
         }
+
+        // Update selected count.
+        var selectedCount = $(this).parent().children('.selected').length;
+        $('.js-selected-count').html(selectedCount);
       });
     }
   };
