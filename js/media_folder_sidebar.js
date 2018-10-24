@@ -11,8 +11,8 @@
    */
   Drupal.behaviors.treeFolderReload = {
     attach: function (context) {
-      $('.js-tree-item', context).click(function (e) {
-        e.preventDefault();
+      $('.js-tree-item', context).click(function(event) {
+        event.preventDefault();
         $('.selected').removeClass('selected');
         $(this).addClass('selected');
         $('.js-current-folder').html($(this).children('span').html());
@@ -61,7 +61,8 @@
    */
   Drupal.behaviors.sidebarCollapse = {
     attach: function (context) {
-      $('.js-dropdown', context).click(function() {
+      $('.js-dropdown', context).click(function(event) {
+        event.preventDefault();
         setInitialHeights();
 
         var $parent = $(this).parent().parent('.sub-dir');
@@ -91,7 +92,8 @@
    */
   Drupal.behaviors.selectMedia = {
     attach: function (context) {
-      $('.js-media-item', context).click(function() {
+      $('.js-media-item', context).click(function(event) {
+        event.preventDefault();
         if ($(this).hasClass('selected')) {
           $(this).removeClass('selected');
         }
@@ -101,6 +103,13 @@
 
         // Update selected count.
         var selectedCount = $(this).parent().children('.selected').length;
+        if (selectedCount > 0) {
+          $('.js-select-actions').removeClass('hidden-scale-y');
+          $('.js-standard-actions').addClass('hidden-scale-y');
+        }else {
+          $('.js-select-actions').addClass('hidden-scale-y');
+          $('.js-standard-actions').removeClass('hidden-scale-y');
+        }
         $('.js-selected-count').html(selectedCount);
       });
     }

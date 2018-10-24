@@ -11,7 +11,14 @@
     </div>
     {{ results }}
     <div class="overview-bar actions">
-      <div class="actions__count"><span class="js-selected-count">0</span> {{ " items selected"|t }}</div>
+      <div class="select-actions js-select-actions hidden-scale-y">
+        <div class="actions__count"><span class="js-selected-count">0</span>{{ " items selected"|t }}</div>
+        <div class="mfb-button js-submit-selected">{{ "Add selected"|t }}</div>
+      </div>
+      <div class="standard-actions js-standard-actions">
+        <div class="mfb-button js-submit-add-folder">{{ "Add folder"|t }}</div>
+        <div class="mfb-button js-submit-add-media">{{ "Add media"|t }}</div>
+      </div>
     </div>
   </div>
 </div>

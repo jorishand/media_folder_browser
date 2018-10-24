@@ -49,6 +49,44 @@
   font-size: 16px;
 }
 
+.overview-bar .select-actions,
+.overview-bar .standard-actions {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: absolute;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  width: 100%;
+  -webkit-transform: scaleY(1);
+          transform: scaleY(1);
+  -webkit-transform-origin: top;
+          transform-origin: top;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  opacity: 1;
+}
+
+.overview-bar .select-actions.hidden-scale-y,
+.overview-bar .standard-actions.hidden-scale-y {
+  -webkit-transform: scaleY(0);
+          transform: scaleY(0);
+  opacity: 0;
+}
+
+.overview-bar .select-actions .mfb-button,
+.overview-bar .standard-actions .mfb-button {
+  margin: 0 5px;
+}
+
+.overview-bar .standard-actions {
+  -webkit-transform-origin: bottom;
+          transform-origin: bottom;
+}
+
 .results-wrapper {
   height: calc(100% - 100px);
 }
@@ -92,6 +130,7 @@
 .overview-item:hover, .overview-item:active, .overview-item:focus {
   border: none;
   color: #000;
+  text-decoration: none;
 }
 
 .overview-item__folder {
@@ -112,6 +151,11 @@
   -webkit-justify-content: center;
       -ms-flex-pack: center;
           justify-content: center;
+  -webkit-transition: -webkit-box-shadow 0.2s ease-in-out;
+  transition: -webkit-box-shadow 0.2s ease-in-out;
+  transition: box-shadow 0.2s ease-in-out;
+  transition: box-shadow 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  border-radius: 15px;
 }
 
 .overview-item__folder__image {
@@ -122,6 +166,11 @@
   margin-top: 5px;
   color: #191919;
   font-weight: 500;
+}
+
+.overview-item__folder:hover {
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
 }
 
 .overview-item__media {
@@ -271,4 +320,22 @@
 
 .hidden {
   display: none;
+}
+
+.mfb-button {
+  display: inline-block;
+  padding: 5px 15px;
+  -webkit-transition: all 0.1s ease-in-out;
+  transition: all 0.1s ease-in-out;
+  border-radius: 13px;
+  background-color: #fff;
+  color: #383838;
+  line-height: normal;
+  text-align: center;
+  cursor: pointer;
+}
+
+.mfb-button:hover, .mfb-button:focus {
+  background-color: #191919;
+  color: #fff;
 }
