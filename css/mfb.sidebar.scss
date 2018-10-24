@@ -10,12 +10,12 @@
   width: 15px;
   height: 15px;
   transition: all 0.2s ease-in-out;
-  background-image: url(../icons/folder-stroke.svg);
+  background-image: url(../assets/folder-stroke.svg);
   background-repeat: no-repeat;
 }
 
 .selected .folder-icon {
-  background-image: url(../icons/folder-filled.svg);
+  background-image: url(../assets/folder-filled.svg);
 }
 
 .mfb-sidebar {
