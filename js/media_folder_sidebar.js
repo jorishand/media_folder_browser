@@ -15,6 +15,8 @@
         e.preventDefault();
         $('.selected').removeClass('selected');
         $(this).addClass('selected');
+        $('.js-current-folder').html($(this).children('span').html());
+        $('.loader-container').removeClass('hidden');
         refreshResults($(this).attr("data-id"));
       });
 
@@ -82,6 +84,22 @@
           });
         }
         alterParentHeight($parent, heightOffset);
+      });
+    }
+  };
+
+  /**
+   * Handles the selection of media items.
+   */
+  Drupal.behaviors.selectMedia = {
+    attach: function (context) {
+      $('.js-media-item', context).click(function() {
+        if ($(this).hasClass('selected')) {
+          $(this).removeClass('selected');
+        }
+        else {
+          $(this).addClass('selected');
+        }
       });
     }
   };

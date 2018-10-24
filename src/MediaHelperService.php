@@ -54,4 +54,20 @@ class MediaHelperService {
     return FALSE;
   }
 
+  /**
+   * Gets media entities that have no parent.
+   *
+   * @return array
+   *   The media entities.
+   */
+  public function getRootMedia() {
+    $storage = $this->entityTypeManager->getStorage('media');
+
+    $nids = \Drupal::entityQuery('media')
+      ->notExists('field_parent_folder')
+      ->execute();
+
+    return $storage->loadMultiple($nids);
+  }
+
 }
