@@ -11,8 +11,8 @@
    */
   Drupal.behaviors.treeFolderReload = {
     attach: function (context) {
-      $('.js-tree-item', context).click(function (e) {
-        e.preventDefault();
+      $('.js-tree-item', context).click(function(event) {
+        event.preventDefault();
         $('.selected').removeClass('selected');
         $(this).addClass('selected');
         $('.js-current-folder').html($(this).children('span').html());
@@ -37,35 +37,34 @@
   };
 
   /**
-   * Set initial heights of the child lists by subtracting their total height
-   * with the height of their children.
+   * Set initial height of all sub dirs after the first uncollapse.
    */
-  Drupal.behaviors.initialHeights = {
-    attach: function(context) {
-      $('.sub-dir', context).each(function() {
-        $(this).find('ul').each(function() {
-          var child_heights = 0;
-          $(this).find('> li > ul').each(function() {
-            child_heights += parseInt($(this).prop('scrollHeight'));
-          });
-          var collapsed_height = parseInt($(this).prop('scrollHeight')) - child_heights;
-          $(this).attr('data-height', collapsed_height);
-        });
-      });
-      $('.sub-dir', context).each(function() {
-        $(this).find('ul').each(function() {
-          $(this).css('max-height', 0);
-        });
-      });
-    }
-  };
+  function setInitialHeights(context) {
+    $('.sub-dir', context).once('initial-heights').each(function() {
+      var $child_list = $(this).children('ul');
+
+      // Alter style in a way that a height can be determined.
+      $(this).removeClass('collapsed');
+      $child_list.css('position', 'absolute');
+      $child_list.css('max-height', '');
+
+      $child_list.attr('data-height', $child_list.prop('offsetHeight'));
+
+      // Reset style.
+      $child_list.css('position', '');
+      $(this).addClass('collapsed');
+    });
+  }
 
   /**
    * Handles collapsing of submenus in the folder tree structure.
    */
   Drupal.behaviors.sidebarCollapse = {
     attach: function (context) {
-      $('.js-dropdown', context).click(function() {
+      $('.js-dropdown', context).click(function(event) {
+        event.preventDefault();
+        setInitialHeights();
+
         var $parent = $(this).parent().parent('.sub-dir');
         var heightOffset = 0;
 
@@ -93,13 +92,25 @@
    */
   Drupal.behaviors.selectMedia = {
     attach: function (context) {
-      $('.js-media-item', context).click(function() {
+      $('.js-media-item', context).click(function(event) {
+        event.preventDefault();
         if ($(this).hasClass('selected')) {
           $(this).removeClass('selected');
         }
         else {
           $(this).addClass('selected');
         }
+
+        // Update selected count.
+        var selectedCount = $(this).parent().children('.selected').length;
+        if (selectedCount > 0) {
+          $('.js-select-actions').removeClass('hidden-scale-y');
+          $('.js-standard-actions').addClass('hidden-scale-y');
+        }else {
+          $('.js-select-actions').addClass('hidden-scale-y');
+          $('.js-standard-actions').removeClass('hidden-scale-y');
+        }
+        $('.js-selected-count').html(selectedCount);
       });
     }
   };

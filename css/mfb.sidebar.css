@@ -100,19 +100,14 @@
 
 .mfb-sidebar .sub-dir .mfb-sidebar__list-item__list {
   margin-top: -5px;
-  -webkit-transform: scaleY(1);
-          transform: scaleY(1);
-  -webkit-transform-origin: top center;
-          transform-origin: top center;
   -webkit-transition: all 0.2s ease-in-out;
   transition: all 0.2s ease-in-out;
   opacity: 1;
   overflow: hidden;
 }
 
-.mfb-sidebar .sub-dir.collapsed .mfb-sidebar__list-item__list {
-  -webkit-transform: scaleY(0);
-          transform: scaleY(0);
+.mfb-sidebar .sub-dir.collapsed > .mfb-sidebar__list-item__list {
+  max-height: 0;
   opacity: 0;
 }
 
@@ -172,7 +167,7 @@
   border-bottom: none;
   color: #fff;
   text-decoration: none;
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .mfb-sidebar .menu-link__title {
@@ -186,4 +181,5 @@
 .mfb-sidebar .menu-link:hover {
   border-bottom: none;
   color: #fff;
+  opacity: 1;
 }
