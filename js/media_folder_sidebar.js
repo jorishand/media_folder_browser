@@ -89,6 +89,22 @@
   };
 
   /**
+   * Handles the selection of media items.
+   */
+  Drupal.behaviors.selectMedia = {
+    attach: function (context) {
+      $('.js-media-item', context).click(function() {
+        if ($(this).hasClass('selected')) {
+          $(this).removeClass('selected');
+        }
+        else {
+          $(this).addClass('selected');
+        }
+      });
+    }
+  };
+
+  /**
    * Update all ul heights upstream.
    *
    * @param element
