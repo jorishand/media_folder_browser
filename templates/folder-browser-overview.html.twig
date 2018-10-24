@@ -3,12 +3,22 @@
       {{ sidebar_folders }}
   </div>
   <div class="mfb-overview">
-    <div class="search-bar">
-      <div class="search-bar__current-folder js-current-folder">Root</div>
+    <div class="overview-bar search">
+      <div class="search__current-folder js-current-folder">Root</div>
     </div>
     <div class="loader-container hidden">
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
     {{ results }}
+    <div class="overview-bar actions">
+      <div class="select-actions js-select-actions hidden-scale-y">
+        <div class="actions__count"><span class="js-selected-count">0</span>{{ " items selected"|t }}</div>
+        <div class="mfb-button js-submit-selected">{{ "Add selected"|t }}</div>
+      </div>
+      <div class="standard-actions js-standard-actions">
+        <div class="mfb-button js-submit-add-folder">{{ "Add folder"|t }}</div>
+        <div class="mfb-button js-submit-add-media">{{ "Add media"|t }}</div>
+      </div>
+    </div>
   </div>
 </div>
