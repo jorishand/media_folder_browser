@@ -10,3 +10,4 @@ browser:
       assets/loader.css: {}
   js:
     js/media_folder_sidebar.js: {}
+    js/media_folder_browser.js: {}
