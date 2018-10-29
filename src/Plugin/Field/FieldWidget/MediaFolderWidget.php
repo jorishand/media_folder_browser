@@ -14,9 +14,19 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Component\Utility\SortArray;
+use Drupal\media_folder_browser\Form\MediaFolderUploadForm;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Folder browser widget.
+ *
+ * @Todo: Refactor when Media Library gets stable.
+ * This class is heavily based on the media library widget.
+ * This form should be refactored to extend the widget media library provides
+ * once it gets stable.
+ *
+ * @see \Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget.
  *
  * @FieldWidget(
  *   id = "folder_browser_widget",
@@ -52,24 +62,37 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
    *   Any third party settings.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity type manager service.
+   * @param bool $add_access
+   *   Indicates whether or not the add button should be shown.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entity_type_manager, $add_access) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->entityTypeManager = $entity_type_manager;
+    $this->addAccess = $add_access;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $settings = $configuration['field_definition']->getSettings()['handler_settings'];
+    $target_bundles = isset($settings['target_bundles']) ? $settings['target_bundles'] : NULL;
     return new static(
       $plugin_id,
       $plugin_definition,
       $configuration['field_definition'],
       $configuration['settings'],
       $configuration['third_party_settings'],
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      MediaFolderUploadForm::create($container)->access($target_bundles)->isAllowed()
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function isApplicable(FieldDefinitionInterface $field_definition) {
+    return $field_definition->getSetting('target_type') === 'media';
   }
 
   /**
@@ -94,20 +117,29 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
     $referenced_entities = $items->referencedEntities();
     $view_builder = $this->entityTypeManager->getViewBuilder('media');
     $field_name = $this->fieldDefinition->getName();
-    $settings = $this->getFieldSetting('handler_settings');
     $parents = $form['#parents'];
     $id_suffix = '-' . implode('-', $parents);
     $wrapper_id = $field_name . '-folder-browser-wrapper' . $id_suffix;
+    $limit_validation_errors = [array_merge($parents, [$field_name])];
+
+    $settings = $this->getFieldSetting('handler_settings');
+
     $element += [
       '#type' => 'fieldset',
       '#cardinality' => $this->fieldDefinition->getFieldStorageDefinition()->getCardinality(),
       '#target_bundles' => isset($settings['target_bundles']) ? $settings['target_bundles'] : FALSE,
-      '#attributes' => [
-        'id' => $wrapper_id,
-        'class' => ['folder-browser-widget'],
-        'data-widget-id' => $field_name . $id_suffix,
-        'data-allowed-types' => $element['#target_bundles'],
-      ],
+    ];
+
+    $cardinality_unlimited = ($element['#cardinality'] === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $remaining = $element['#cardinality'] - count($referenced_entities);
+
+    $element['#attributes'] = [
+      'id' => $wrapper_id,
+      'class' => ['folder-browser-widget'],
+      'data-widget-id' => $field_name . $id_suffix,
+      'data-allowed-types' => $element['#target_bundles'],
+      'data-remaining' => $cardinality_unlimited ? FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED : $remaining,
+      'data-add-access' => $this->addAccess,
     ];
 
     $element['selection'] = [
@@ -123,6 +155,21 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
     if (empty($referenced_entities)) {
       $element['empty_selection'] = [
         '#markup' => $this->t('<p>No media items are selected.</p>'),
+      ];
+    }
+    else {
+      $element['weight_toggle'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'button',
+        '#value' => $this->t('Show media item weights'),
+        '#attributes' => [
+          'class' => [
+            'link',
+            'media-library-widget__toggle-weight',
+            'js-media-library-widget-toggle-weight',
+          ],
+          'title' => $this->t('Re-order media by numerical weight instead of dragging'),
+        ],
       ];
     }
 
@@ -150,6 +197,8 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
               'wrapper' => $wrapper_id,
             ],
             '#submit' => [[static::class, 'removeItem']],
+            // Prevent errors in other widgets from preventing removal.
+            '#limit_validation_errors' => $limit_validation_errors,
           ],
         ],
         'target_id' => [
@@ -171,6 +220,17 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
       ];
     }
 
+    // Inform the user of how many items are remaining.
+    if (!$cardinality_unlimited) {
+      if ($remaining) {
+        $cardinality_message = $this->formatPlural($remaining, 'One media item remaining.', '@count media items remaining.');
+      }
+      else {
+        $cardinality_message = $this->t('The maximum number of media items have been selected.');
+      }
+      $element['#description'] .= '<br />' . $cardinality_message;
+    }
+
     $dialog_options = Json::encode([
       'dialogClass' => 'folder-browser-widget-modal',
       'height' => '75%',
@@ -189,6 +249,9 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
         'data-dialog-type' => 'modal',
         'data-dialog-options' => $dialog_options,
       ],
+      // Prevent errors in other widgets from preventing addition.
+      '#limit_validation_errors' => $limit_validation_errors,
+      '#access' => $cardinality_unlimited || $remaining > 0,
     ];
 
     $element['folder_browser_selection'] = [
@@ -213,10 +276,31 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
         'data-folder-browser-widget-update' => $field_name . $id_suffix,
         'class' => ['js-hide'],
       ],
+      '#validate' => [[static::class, 'validateItems']],
       '#submit' => [[static::class, 'updateItems']],
+      // Prevent errors in other widgets from preventing updates.
+      '#limit_validation_errors' => $limit_validation_errors,
     ];
 
     return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function errorElement(array $element, ConstraintViolationInterface $error, array $form, FormStateInterface $form_state) {
+    return isset($element['target_id']) ? $element['target_id'] : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    if (isset($values['selection'])) {
+      usort($values['selection'], [SortArray::class, 'sortByWeightElement']);
+      return $values['selection'];
+    }
+    return [];
   }
 
   /**
@@ -281,6 +365,49 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
   }
 
   /**
+   * Validates that newly selected items can be added to the widget.
+   *
+   * Making an invalid selection from the view should not be possible, but we
+   * still validate in case other selection methods (ex: upload) are valid.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public static function validateItems(array $form, FormStateInterface $form_state) {
+    $button = $form_state->getTriggeringElement();
+    $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
+
+    $field_state = static::getFieldState($element, $form_state);
+    $media = static::getNewMediaItems($element, $form_state);
+    if (empty($media)) {
+      return;
+    }
+
+    // Check if more items were selected than we allow.
+    $cardinality_unlimited = ($element['#cardinality'] === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $selection = count($field_state['items']) + count($media);
+    if (!$cardinality_unlimited && ($selection > $element['#cardinality'])) {
+      $form_state->setError($element, \Drupal::translation()->formatPlural($element['#cardinality'], 'Only one item can be selected.', 'Only @count items can be selected.'));
+    }
+
+    // Validate that each selected media is of an allowed bundle.
+    $all_bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
+    $bundle_labels = array_map(function ($bundle) use ($all_bundles) {
+      return $all_bundles[$bundle]['label'];
+    }, $element['#target_bundles']);
+    foreach ($media as $media_item) {
+      if ($element['#target_bundles'] && !in_array($media_item->bundle(), $element['#target_bundles'], TRUE)) {
+        $form_state->setError($element, t('The media item "@label" is not of an accepted type. Allowed types: @types', [
+          '@label' => $media_item->label(),
+          '@types' => implode(', ', $bundle_labels),
+        ]));
+      }
+    }
+  }
+
+  /**
    * Updates the field state and flags the form for rebuild.
    *
    * @param array $form
@@ -336,24 +463,6 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
         /** @var \Drupal\media\MediaInterface[] $media */
         return Media::loadMultiple($ids);
       }
-    }
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function isApplicable(FieldDefinitionInterface $field_definition) {
-    return $field_definition->getSetting('target_type') === 'media';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
-    if (isset($values['selection'])) {
-      usort($values['selection'], [SortArray::class, 'sortByWeightElement']);
-      return $values['selection'];
     }
     return [];
   }
