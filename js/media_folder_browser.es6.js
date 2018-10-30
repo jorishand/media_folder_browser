@@ -4,8 +4,6 @@
  */
 
 (function ($, Drupal) {
-  'use strict';
-
   /**
    * Handles the selection of media items.
    */
@@ -22,17 +20,18 @@
         }
 
         // Update selected count.
-        let selectedCount = $(this).parent().children('.selected').length;
+        const selectedCount = $(this).parent().children('.selected').length;
         if (selectedCount > 0) {
           $('.js-select-actions').removeClass('hidden-scale-y');
           $('.js-standard-actions').addClass('hidden-scale-y');
-        }else {
+        }
+        else {
           $('.js-select-actions').addClass('hidden-scale-y');
           $('.js-standard-actions').removeClass('hidden-scale-y');
         }
         $('.js-selected-count').html(selectedCount);
       });
-    }
+    },
   };
 
   /**
@@ -45,19 +44,18 @@
 
         $('.loader-container').removeClass('hidden');
 
-        let widget_id = $(this).closest('.folder-browser-widget').attr('data-widget-id');
+        const widgetId = $(this).closest('.folder-browser-widget').attr('data-widget-id');
         let selected = '';
 
         $('.overview-container').children('.selected').each(() => {
-          if(selected !== '') selected += ',';
-          selected += $(this).attr('data-id')
+          if (selected !== '') selected += ',';
+          selected += $(this).attr('data-id');
         });
 
-        $('[data-folder-browser-widget-value=' + widget_id + ']').val(selected);
-        $('[data-folder-browser-widget-update=' + widget_id + ']').trigger('mousedown');
+        $(`[data-folder-browser-widget-value=${widgetId}]`).val(selected);
+        $(`[data-folder-browser-widget-update=${widgetId}]`).trigger('mousedown');
         $('#drupal-modal').dialog('close');
       });
-    }
+    },
   };
-
-})(jQuery, Drupal);
+}(jQuery, Drupal));

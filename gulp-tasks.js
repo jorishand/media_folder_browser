@@ -25,6 +25,13 @@ module.exports = function(gulp, plugins, options) {
     .pipe(gulp.dest(options.jsDest));
   });
 
+  gulp.task('js:lint', function() {
+    return gulp.src(options.es6Src + '/*.es6.js')
+    .pipe(plugins.eslint())
+    .pipe(plugins.eslint.format())
+    .pipe(plugins.eslint.failOnError());
+  });
+
   gulp.task('sass', function() {
     return gulp.src(options.scssSrc + '/*.scss')
       .pipe(plugins.sass({
@@ -42,7 +49,7 @@ module.exports = function(gulp, plugins, options) {
 
   gulp.task('watch', function () {
     gulp.watch(options.scssSrc + '/*.scss', ['sass:lint', 'sass']);
-    gulp.watch(options.es6Src + '/*.es6.js', ['js']);
+    gulp.watch(options.es6Src + '/*.es6.js', ['js:lint', 'js']);
   });
 
   // Default task to run everything in correct order.
