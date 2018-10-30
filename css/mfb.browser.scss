@@ -233,6 +233,46 @@
   }
 }
 
+// Context Menu
+.folder-context-menu {
+  display: none;
+  position: fixed;
+  width: 120px;
+  background-color: $white;
+  box-shadow: 0 4px 5px 3px $shadow-dark;
+  z-index: 3;
+}
+
+.context-options {
+  display: none;
+  margin: 0;
+  padding: 10px 0;
+  list-style: none;
+
+  .option {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: $weight-semi-bold;
+    cursor: pointer;
+
+    &:hover {
+      background: $shadow-light;
+
+      .sub-options {
+        display: block;
+      }
+    }
+  }
+}
+
+.sub-options {
+  position: absolute;
+  top: 23px;
+  left: 110px;
+  background-color: $white;
+  box-shadow: 0 4px 5px 3px $shadow-dark;
+}
+
 // Loader:
 .loader-container {
   display: flex;
@@ -242,7 +282,7 @@
   width: 100%;
   height: calc(100% - 100px);
   background-color: $loader-background;
-  z-index: 1;
+  z-index: 2;
 }
 
 .hidden {
