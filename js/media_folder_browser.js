@@ -1,6 +1,6 @@
 /**
  * @file
- * Media general folder browser related JS code.
+ * Media folder browser related JS code.
  */
 
 (function ($, Drupal) {
@@ -11,8 +11,8 @@
    */
   Drupal.behaviors.selectMedia = {
     attach: function (context) {
-      $('.js-media-item', context).click(function(event) {
-        event.preventDefault();
+      $('.js-media-item', context).click(function(e) {
+        e.preventDefault();
 
         if ($(this).hasClass('selected')) {
           $(this).removeClass('selected');
@@ -40,8 +40,8 @@
    */
   Drupal.behaviors.submitSelection = {
     attach: function (context) {
-      $('.js-submit-selected', context).click(function(event) {
-        event.preventDefault();
+      $('.js-submit-selected', context).click(function(e) {
+        e.preventDefault();
 
         $('.loader-container').removeClass('hidden');
 

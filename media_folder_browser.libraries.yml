@@ -11,3 +11,4 @@ browser:
   js:
     js/media_folder_sidebar.js: {}
     js/media_folder_browser.js: {}
+    js/media_folder_context_menu.js: {}
