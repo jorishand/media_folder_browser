@@ -1,15 +1,15 @@
 /**
  * @file
  * Provides Gulp configurations and tasks for compiling CSS files
- * from SASS files.
+ * from SASS files and transpiling the JS.
  */
 
 'use strict';
 
 // Load gulp and needed lower level libs.
 var gulp = require('gulp'),
-  yaml   = require('js-yaml'),
-  fs     = require('fs');
+    yaml = require('js-yaml'),
+    fs = require('fs');
 
 // Load gulp options.
 var options = yaml.safeLoad(fs.readFileSync('./gulp-options.yml', 'utf8'));
