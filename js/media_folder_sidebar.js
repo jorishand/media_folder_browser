@@ -88,34 +88,6 @@
   };
 
   /**
-   * Handles the selection of media items.
-   */
-  Drupal.behaviors.selectMedia = {
-    attach: function (context) {
-      $('.js-media-item', context).click(function(event) {
-        event.preventDefault();
-        if ($(this).hasClass('selected')) {
-          $(this).removeClass('selected');
-        }
-        else {
-          $(this).addClass('selected');
-        }
-
-        // Update selected count.
-        var selectedCount = $(this).parent().children('.selected').length;
-        if (selectedCount > 0) {
-          $('.js-select-actions').removeClass('hidden-scale-y');
-          $('.js-standard-actions').addClass('hidden-scale-y');
-        }else {
-          $('.js-select-actions').addClass('hidden-scale-y');
-          $('.js-standard-actions').removeClass('hidden-scale-y');
-        }
-        $('.js-selected-count').html(selectedCount);
-      });
-    }
-  };
-
-  /**
    * Update all ul heights upstream.
    *
    * @param element
