@@ -3,24 +3,30 @@
  * Media folder browser related JS code.
  */
 
-(function ($, Drupal) {
+(($, Drupal) => {
   /**
-   * Handles the selection of media items.
+   * Handles the selection of media entities.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for selecting media tiles by clicking them.
    */
   Drupal.behaviors.selectMedia = {
     attach(context) {
       $('.js-media-item', context).click((e) => {
         e.preventDefault();
+        const clickedElement = $(e.currentTarget);
 
-        if ($(this).hasClass('selected')) {
-          $(this).removeClass('selected');
+        if (clickedElement.hasClass('selected')) {
+          clickedElement.removeClass('selected');
         }
         else {
-          $(this).addClass('selected');
+          clickedElement.addClass('selected');
         }
 
         // Update selected count.
-        const selectedCount = $(this).parent().children('.selected').length;
+        const selectedCount = clickedElement.parent().children('.selected').length;
         if (selectedCount > 0) {
           $('.js-select-actions').removeClass('hidden-scale-y');
           $('.js-standard-actions').addClass('hidden-scale-y');
@@ -35,21 +41,27 @@
   };
 
   /**
-   * Sends selected media to a hidden field in the widget.
+   * Handles the submission of selected media entities.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for submitting media.
    */
   Drupal.behaviors.submitSelection = {
     attach(context) {
       $('.js-submit-selected', context).click((e) => {
         e.preventDefault();
+        const clickedElement = $(e.currentTarget);
+        const widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
 
         $('.loader-container').removeClass('hidden');
 
-        const widgetId = $(this).closest('.folder-browser-widget').attr('data-widget-id');
         let selected = '';
 
-        $('.overview-container').children('.selected').each(() => {
+        $('.overview-container').children('.selected').each((index, elem) => {
           if (selected !== '') selected += ',';
-          selected += $(this).attr('data-id');
+          selected += $(elem).attr('data-id');
         });
 
         $(`[data-folder-browser-widget-value=${widgetId}]`).val(selected);
@@ -58,4 +70,4 @@
       });
     },
   };
-}(jQuery, Drupal));
+})(jQuery, Drupal);

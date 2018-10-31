@@ -5,26 +5,28 @@
  * Media folder browser related JS code.
  */
 (function ($, Drupal) {
-  'use strict';
   /**
-   * Handles the selection of media items.
+   * Handles the selection of media entities.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for selecting media tiles by clicking them.
    */
-
   Drupal.behaviors.selectMedia = {
     attach: function attach(context) {
-      var _this = this;
-
       $('.js-media-item', context).click(function (e) {
         e.preventDefault();
+        var clickedElement = $(e.currentTarget);
 
-        if ($(_this).hasClass('selected')) {
-          $(_this).removeClass('selected');
+        if (clickedElement.hasClass('selected')) {
+          clickedElement.removeClass('selected');
         } else {
-          $(_this).addClass('selected');
+          clickedElement.addClass('selected');
         } // Update selected count.
 
 
-        var selectedCount = $(_this).parent().children('.selected').length;
+        var selectedCount = clickedElement.parent().children('.selected').length;
 
         if (selectedCount > 0) {
           $('.js-select-actions').removeClass('hidden-scale-y');
@@ -39,24 +41,28 @@
     }
   };
   /**
-   * Sends selected media to a hidden field in the widget.
+   * Handles the submission of selected media entities.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for submitting media.
    */
 
   Drupal.behaviors.submitSelection = {
     attach: function attach(context) {
-      var _this2 = this;
-
       $('.js-submit-selected', context).click(function (e) {
         e.preventDefault();
+        var clickedElement = $(e.currentTarget);
+        var widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
         $('.loader-container').removeClass('hidden');
-        var widget_id = $(_this2).closest('.folder-browser-widget').attr('data-widget-id');
         var selected = '';
-        $('.overview-container').children('.selected').each(function () {
+        $('.overview-container').children('.selected').each(function (index, elem) {
           if (selected !== '') selected += ',';
-          selected += $(_this2).attr('data-id');
+          selected += $(elem).attr('data-id');
         });
-        $('[data-folder-browser-widget-value=' + widget_id + ']').val(selected);
-        $('[data-folder-browser-widget-update=' + widget_id + ']').trigger('mousedown');
+        $("[data-folder-browser-widget-value=" + widgetId + "]").val(selected);
+        $("[data-folder-browser-widget-update=" + widgetId + "]").trigger('mousedown');
         $('#drupal-modal').dialog('close');
       });
     }
