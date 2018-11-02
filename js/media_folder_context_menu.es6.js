@@ -5,102 +5,91 @@
 
 (($, Drupal) => {
   /**
-   * Populate folders in the "move" sub-menu.
-   */
-  Drupal.behaviors.setMoveFolders = {
-    attach(context) {
-      $('.overview-item__folder', context).each((index, elem) => {
-        const dataId = $(elem).attr('data-id');
-        const folderName = $(elem).find('.overview-item__folder__label').html();
-        const folderItem = `<li class="option js-context-action" data-action="move" data-id="${dataId}">${folderName}</li>`;
-        $('.js-context-move-list').append(folderItem);
-      });
-    },
-  };
-
-  /**
-   * Function to toggle the context menu display.
+   * Context menu object.
    *
-   * @param {string} command
-   *   Wether to show or hide the menu, use "show" to make the menu visible.
+   * @constructor
+   *
+   * @param {jQuery} target
+   *   The target element.
+   * @param {string} type
+   *   The type of context menu, this will determine which options will be shown.
+   * @param {number} x
+   *   The X position for the context menu.
+   * @param {number} y
+   *   The Y position for the context menu.
    */
-  function toggleMenu(command) {
-    const $context = $('.js-context-menu');
-    if (command === 'show') {
-      $context.css('display', 'block');
-    }
-    else {
-      $context.css('display', 'none');
+  class ContextMenu {
+    constructor(target, type, x, y) {
+      this.target = target;
+
+      // Remove any old context menus from the DOM.
+      $('.js-context-menu').remove();
+
+      // Build the context menu.;
+      const $menuWrapper = $(`<div class="folder-context-menu js-context-menu" style="left:${x}px;top:${y}px">`);
+      const $menu = $('<ul class="context-options">');
+
+      if (type === 'overview') {
+        $menu.append($(`<li class="option" data-action="add-folder">${Drupal.t('Add folder')}</li>`));
+        $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
+      }
+      else {
+        // If folders are present, add move option and build the folder list.
+        const $folders = $('.overview-item__folder');
+        if ($folders[0]) {
+          const $moveAction = $(`<li class="option">${Drupal.t('Move to')}</li>`);
+          const $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
+
+          $folders.each((index, elem) => {
+            const dataId = $(elem).attr('data-id');
+            const folderName = $(elem).find('.overview-item__folder__label').html();
+            $folderList.append(`<li class="option" data-action="move" data-id="${dataId}">${folderName}</li>`);
+          });
+
+          $menu.append($moveAction.append($folderList));
+        }
+
+        if (type === 'media') {
+          $menu.append($(`<li class="option" data-action="edit">${Drupal.t('Edit')}</li>`));
+        }
+
+        $menu.append($(`<li class="option" data-action="rename">${Drupal.t('Rename')}</li>`));
+        $menu.append($(`<li class="option" data-action="delete">${Drupal.t('Delete')}</li>`));
+      }
+
+      $('.js-media-folder-browser').append($menuWrapper.append($menu));
+
+      this.domElement = $menu;
+
+      // todo: Add event listeners
+      //$menu.find('[data-action]').each((index, elem) => {
+      //  elem.addEventListener('click', this.actionHandler(elem).bind(this));
+      //});
     }
   }
 
   /**
-   * Shows the context menu.
+   * Add handlers to build the context menu.
    */
   Drupal.behaviors.contextMenu = {
     attach() {
-      const $context = $('.js-context-menu');
-      const $overviewContext = $('.js-overview-context');
-      const $entityContext = $('.js-entity-context');
-
-      function openContext(event) {
-        $context.css('left', `${event.clientX}px`);
-        $context.css('top', `${event.clientY}px`);
-        $context.attr('data-active-element', event.trigger);
-        toggleMenu('show');
-      }
-
       $('.js-overview').bind('contextmenu', (e) => {
         e.preventDefault();
-
         // Checks if a child was clicked.
         if (e.target !== e.currentTarget) {
           return;
         }
-
-        $entityContext.css('display', 'none');
-        $overviewContext.css('display', 'block');
-        openContext(e);
+        new ContextMenu($(e.trigger), 'overview', e.clientX, e.clientY);
       });
 
       $('.js-tree-item, .js-folder-item').bind('contextmenu', (e) => {
         e.preventDefault();
-        $entityContext.css('display', 'block');
-        $overviewContext.css('display', 'none');
-        $(".js-context-action[data-action='edit']").css('display', 'none');
-        openContext(e);
+        new ContextMenu($(e.currentTarget), 'folder', e.clientX, e.clientY);
       });
 
       $('.js-media-item').bind('contextmenu', (e) => {
         e.preventDefault();
-        $entityContext.css('display', 'block');
-        $overviewContext.css('display', 'none');
-        $(".js-context-action[data-action='edit']").css('display', 'block');
-        openContext(e);
-      });
-    },
-  };
-
-  /**
-   * Handles context menu actions.
-   *
-   * @type {Drupal~behavior}
-   *
-   * @prop {Drupal~behaviorAttach} attach
-   *   Attaches click events to the different options in the context menu.
-   */
-  Drupal.behaviors.contextAction = {
-    attach() {
-      $('.js-context-action').click((e) => {
-        const clickedElement = $(e.currentTarget);
-        switch (clickedElement.attr('data-action')) {
-          case 'move':
-            console.log('move to', $(this).attr('data-id'));
-            break;
-
-          default:
-            console.log('action clicked');
-        }
+        new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
       });
     },
   };
@@ -112,9 +101,7 @@
     attach() {
       $('.media-folder-browser').click((e) => {
         e.preventDefault();
-        if ($('.js-context-menu').css('display') === 'block') {
-          toggleMenu('hide');
-        }
+        $('.js-context-menu').remove();
       });
     },
   };

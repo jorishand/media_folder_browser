@@ -71,7 +71,7 @@
   function alterParentHeight($element, offset) {
     var parentList = $element.parent('ul');
     var dataHeight = parseInt(parentList.attr('data-height'), 10) + parseInt(offset, 10);
-    parentList.css('max-height', dataHeight + "px");
+    parentList.css('max-height', "".concat(dataHeight, "px"));
     parentList.attr('data-height', dataHeight);
     var parentListParent = parentList.parent('.sub-dir');
 
@@ -102,7 +102,7 @@
           $parent.removeClass('collapsed');
           $parent.children('ul').each(function (index, elem) {
             var dataHeight = $(elem).attr('data-height');
-            $(elem).css('max-height', dataHeight + "px");
+            $(elem).css('max-height', "".concat(dataHeight, "px"));
             heightOffset = dataHeight;
           });
         } else {

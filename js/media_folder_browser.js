@@ -61,8 +61,8 @@
           if (selected !== '') selected += ',';
           selected += $(elem).attr('data-id');
         });
-        $("[data-folder-browser-widget-value=" + widgetId + "]").val(selected);
-        $("[data-folder-browser-widget-update=" + widgetId + "]").trigger('mousedown');
+        $("[data-folder-browser-widget-value=".concat(widgetId, "]")).val(selected);
+        $("[data-folder-browser-widget-update=".concat(widgetId, "]")).trigger('mousedown');
         $('#drupal-modal').dialog('close');
       });
     }
