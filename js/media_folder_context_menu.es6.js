@@ -21,15 +21,20 @@
   class ContextMenu {
     constructor(target, type, x, y) {
       this.target = target;
+      this.type = type;
+      this.x = x;
+      this.y = y;
+    }
 
+    render() {
       // Remove any old context menus from the DOM.
       $('.js-context-menu').remove();
 
       // Build the context menu.;
-      const $menuWrapper = $(`<div class="folder-context-menu js-context-menu" style="left:${x}px;top:${y}px">`);
+      const $menuWrapper = $(`<div class="folder-context-menu js-context-menu" style="left:${this.x}px;top:${this.y}px">`);
       const $menu = $('<ul class="context-options">');
 
-      if (type === 'overview') {
+      if (this.type === 'overview') {
         $menu.append($(`<li class="option" data-action="add-folder">${Drupal.t('Add folder')}</li>`));
         $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
       }
@@ -49,7 +54,7 @@
           $menu.append($moveAction.append($folderList));
         }
 
-        if (type === 'media') {
+        if (this.type === 'media') {
           $menu.append($(`<li class="option" data-action="edit">${Drupal.t('Edit')}</li>`));
         }
 
@@ -62,9 +67,17 @@
       this.domElement = $menu;
 
       // todo: Add event listeners
-      //$menu.find('[data-action]').each((index, elem) => {
-      //  elem.addEventListener('click', this.actionHandler(elem).bind(this));
-      //});
+      $menu.find('[data-action]').each((index, elem) => {
+        elem.addEventListener('click', () => this.actionHandler(elem));
+      });
+    }
+
+    actionHandler(elem) {
+      console.log(elem);
+      console.log(this.target);
+      console.log(this.type);
+      console.log(this.x);
+      console.log(this.y);
     }
   }
 
@@ -79,17 +92,20 @@
         if (e.target !== e.currentTarget) {
           return;
         }
-        new ContextMenu($(e.trigger), 'overview', e.clientX, e.clientY);
+        const context = new ContextMenu($(e.trigger), 'overview', e.clientX, e.clientY);
+        context.render();
       });
 
       $('.js-tree-item, .js-folder-item').bind('contextmenu', (e) => {
         e.preventDefault();
-        new ContextMenu($(e.currentTarget), 'folder', e.clientX, e.clientY);
+        const context = new ContextMenu($(e.currentTarget), 'folder', e.clientX, e.clientY);
+        context.render();
       });
 
       $('.js-media-item').bind('contextmenu', (e) => {
         e.preventDefault();
-        new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
+        const context = new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
+        context.render();
       });
     },
   };

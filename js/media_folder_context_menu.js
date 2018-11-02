@@ -2,6 +2,10 @@
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 /**
  * @file
  * Media folder browser JS code for the context menu.
@@ -21,48 +25,77 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {number} y
    *   The Y position for the context menu.
    */
-  var ContextMenu = function ContextMenu(target, type, x, y) {
-    _classCallCheck(this, ContextMenu);
+  var ContextMenu =
+  /*#__PURE__*/
+  function () {
+    function ContextMenu(target, type, x, y) {
+      _classCallCheck(this, ContextMenu);
 
-    this.target = target; // Remove any old context menus from the DOM.
-
-    $('.js-context-menu').remove(); // Build the context menu.;
-
-    var $menuWrapper = $("<div class=\"folder-context-menu js-context-menu\" style=\"left:".concat(x, "px;top:").concat(y, "px\">"));
-    var $menu = $('<ul class="context-options">');
-
-    if (type === 'overview') {
-      $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
-      $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
-    } else {
-      // If folders are present, add move option and build the folder list.
-      var $folders = $('.overview-item__folder');
-
-      if ($folders[0]) {
-        var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
-        var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
-        $folders.each(function (index, elem) {
-          var dataId = $(elem).attr('data-id');
-          var folderName = $(elem).find('.overview-item__folder__label').html();
-          $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
-        });
-        $menu.append($moveAction.append($folderList));
-      }
-
-      if (type === 'media') {
-        $menu.append($("<li class=\"option\" data-action=\"edit\">".concat(Drupal.t('Edit'), "</li>")));
-      }
-
-      $menu.append($("<li class=\"option\" data-action=\"rename\">".concat(Drupal.t('Rename'), "</li>")));
-      $menu.append($("<li class=\"option\" data-action=\"delete\">".concat(Drupal.t('Delete'), "</li>")));
+      this.target = target;
+      this.type = type;
+      this.x = x;
+      this.y = y;
     }
 
-    $('.js-media-folder-browser').append($menuWrapper.append($menu));
-    this.domElement = $menu; // todo: Add event listeners
-    //$menu.find('[data-action]').each((index, elem) => {
-    //  elem.addEventListener('click', this.actionHandler(elem).bind(this));
-    //});
-  };
+    _createClass(ContextMenu, [{
+      key: "render",
+      value: function render() {
+        var _this = this;
+
+        // Remove any old context menus from the DOM.
+        $('.js-context-menu').remove(); // Build the context menu.;
+
+        var $menuWrapper = $("<div class=\"folder-context-menu js-context-menu\" style=\"left:".concat(this.x, "px;top:").concat(this.y, "px\">"));
+        var $menu = $('<ul class="context-options">');
+
+        if (this.type === 'overview') {
+          $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
+          $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
+        } else {
+          // If folders are present, add move option and build the folder list.
+          var $folders = $('.overview-item__folder');
+
+          if ($folders[0]) {
+            var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
+            var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
+            $folders.each(function (index, elem) {
+              var dataId = $(elem).attr('data-id');
+              var folderName = $(elem).find('.overview-item__folder__label').html();
+              $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
+            });
+            $menu.append($moveAction.append($folderList));
+          }
+
+          if (this.type === 'media') {
+            $menu.append($("<li class=\"option\" data-action=\"edit\">".concat(Drupal.t('Edit'), "</li>")));
+          }
+
+          $menu.append($("<li class=\"option\" data-action=\"rename\">".concat(Drupal.t('Rename'), "</li>")));
+          $menu.append($("<li class=\"option\" data-action=\"delete\">".concat(Drupal.t('Delete'), "</li>")));
+        }
+
+        $('.js-media-folder-browser').append($menuWrapper.append($menu));
+        this.domElement = $menu; // todo: Add event listeners
+
+        $menu.find('[data-action]').each(function (index, elem) {
+          elem.addEventListener('click', function () {
+            return _this.actionHandler(elem);
+          });
+        });
+      }
+    }, {
+      key: "actionHandler",
+      value: function actionHandler(elem) {
+        console.log(elem);
+        console.log(this.target);
+        console.log(this.type);
+        console.log(this.x);
+        console.log(this.y);
+      }
+    }]);
+
+    return ContextMenu;
+  }();
   /**
    * Add handlers to build the context menu.
    */
@@ -77,15 +110,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return;
         }
 
-        new ContextMenu($(e.trigger), 'overview', e.clientX, e.clientY);
+        var context = new ContextMenu($(e.trigger), 'overview', e.clientX, e.clientY);
+        context.render();
       });
       $('.js-tree-item, .js-folder-item').bind('contextmenu', function (e) {
         e.preventDefault();
-        new ContextMenu($(e.currentTarget), 'folder', e.clientX, e.clientY);
+        var context = new ContextMenu($(e.currentTarget), 'folder', e.clientX, e.clientY);
+        context.render();
       });
       $('.js-media-item').bind('contextmenu', function (e) {
         e.preventDefault();
-        new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
+        var context = new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
+        context.render();
       });
     }
   };
