@@ -3,6 +3,11 @@ module.exports = function(gulp, plugins, options) {
 
   'use strict';
 
+  function handleError (error) {
+    console.log(error.toString());
+    this.emit('end');
+  }
+
   // Processor for linting is assigned to options so it can be reused later.
   options.processors = [
     // Options are defined in .stylelintrc.yaml file.
@@ -19,8 +24,9 @@ module.exports = function(gulp, plugins, options) {
   gulp.task('js', function() {
     return gulp.src(options.es6Src + '/*.es6.js')
     .pipe(plugins.babel({
-      presets: ['env']
+      presets: ['@babel/preset-env']
     }))
+    .on('error', handleError)
     .pipe(plugins.extReplace('.js', '.es6.js'))
     .pipe(gulp.dest(options.jsDest));
   });
