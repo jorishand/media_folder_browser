@@ -303,7 +303,7 @@ class MediaFolderController extends ControllerBase {
    * @param int $folder_id
    *   ID of the folder.
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   * @return \Drupal\Core\Ajax\AjaxResponse
    *   A redirect response.
    */
   public function moveMedia(int $media_id, int $folder_id) {
@@ -321,7 +321,7 @@ class MediaFolderController extends ControllerBase {
       }
     }
     // ToDo: error responses and watchdog warnings.
-    return $this->redirect('<front>');
+    return new AjaxResponse();
   }
 
   /**
