@@ -299,7 +299,6 @@
 }
 
 .folder-context-menu {
-  display: none;
   position: fixed;
   width: 120px;
   background-color: #fff;
@@ -309,7 +308,6 @@
 }
 
 .context-options {
-  display: none;
   margin: 0;
   padding: 10px 0;
   list-style: none;
@@ -331,6 +329,7 @@
 }
 
 .sub-options {
+  display: none;
   position: absolute;
   top: 23px;
   left: 110px;

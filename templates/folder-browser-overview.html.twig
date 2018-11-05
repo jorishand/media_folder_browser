@@ -1,23 +1,4 @@
-<div class="media-folder-browser">
-
-  <div class="folder-context-menu js-context-menu">
-    <ul class="context-options js-entity-context">
-      <li class="option">
-        {{ "Move to"|t }}
-        <ul class="context-options sub-options js-context-move-list">
-          {# <li class="option js-context-move-folder" data-id="1">Folder 1</li> #}
-        </ul>
-      </li>
-      <li class="option js-context-action" data-action="edit">{{ "Edit"|t }}</li>
-      <li class="option js-context-action" data-action="rename">{{ "Rename"|t }}</li>
-      <li class="option js-context-action" data-action="delete">{{ "Delete"|t }}</li>
-    </ul>
-    <ul class="context-options js-overview-context">
-      <li class="option js-context-action" data-action="add-folder">{{ "Add folder"|t }}</li>
-      <li class="option js-context-action" data-action="add-media">{{ "Add media"|t }}</li>
-    </ul>
-  </div>
-
+<div class="media-folder-browser js-media-folder-browser">
   <div class="mfb-sidebar">
       {{ sidebar_folders }}
   </div>
