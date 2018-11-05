@@ -15,44 +15,38 @@
    */
   Drupal.behaviors.treeFolderReload = {
     attach: function attach(context) {
-      function refreshResults(id) {
-        $.get('/media-folder-browser/overview/refresh', {
-          id: id
-        }, function (data) {
-          // Simulate a drupal.ajax response to correctly parse data.
-          var ajaxObject = Drupal.ajax({
-            url: '',
-            base: false,
-            element: false,
-            progress: false
-          });
-          ajaxObject.success(data, 'success');
-        });
-      }
-
       $('.js-tree-item', context).click(function (e) {
         e.preventDefault();
-        var clickedElement = $(e.currentTarget);
+        var clickedElement = $(e.currentTarget); // Set 'selected' class on the clicked folder.
+
         $('.selected').removeClass('selected');
-        clickedElement.addClass('selected');
-        $('.js-current-folder').html(clickedElement.children('span').html());
-        $('.loader-container').removeClass('hidden');
-        refreshResults(clickedElement.attr('data-id'));
+        clickedElement.addClass('selected'); // Set 'current folder' label.
+
+        $('.js-current-folder').html(clickedElement.children('span').html()); // Display the loader.
+
+        $('.loader-container').removeClass('hidden'); // Refresh the overview.
+
+        Drupal.mfbCommon.reload(clickedElement.attr('data-id'));
       });
     }
   };
   /**
    * Set initial height of all collapsible folders after the first uncollapse.
+   *
+   * We set a data attribute for each collapsible list with its offset height.
+   * This way we can dynamically handle the collapse animations, which require
+   * an accurate height to look smooth.
    */
 
   function setInitialHeights() {
     $('.sub-dir').once('initial-heights').each(function (index, elem) {
-      var $childList = $(elem).children('ul'); // Alter style in a way that a height can be determined.
+      var $childList = $(elem).children('ul'); // Temporarily alter the element so that a height can be determined.
 
       $(elem).removeClass('collapsed');
       $childList.css('position', 'absolute');
-      $childList.css('max-height', '');
-      $childList.attr('data-height', $childList.prop('offsetHeight')); // Reset style.
+      $childList.css('max-height', ''); // Get the offsetHeight and set it to a data attribute for later use.
+
+      $childList.attr('data-height', $childList.prop('offsetHeight')); // Reset the element's style to its normal state.
 
       $childList.css('position', '');
       $(elem).addClass('collapsed');
@@ -60,6 +54,9 @@
   }
   /**
    * Update all ul heights upstream.
+   *
+   * We do this because a collapsed child list affects the actual height of all
+   * its parents.
    *
    * @param {jQuery} $element
    *   The element to start from.
@@ -97,20 +94,17 @@
         var clickedElement = $(e.currentTarget);
         var $parent = clickedElement.parent().parent('.sub-dir');
         var heightOffset = 0;
+        var $elem = $parent.children('ul').first();
+        var dataHeight = $elem.attr('data-height');
 
         if ($parent.hasClass('collapsed')) {
           $parent.removeClass('collapsed');
-          $parent.children('ul').each(function (index, elem) {
-            var dataHeight = $(elem).attr('data-height');
-            $(elem).css('max-height', "".concat(dataHeight, "px"));
-            heightOffset = dataHeight;
-          });
+          $elem.css('max-height', "".concat(dataHeight, "px"));
+          heightOffset = dataHeight;
         } else {
           $parent.addClass('collapsed');
-          $parent.children('ul').each(function (index, elem) {
-            $(elem).css('max-height', 0);
-            heightOffset = -$(elem).attr('data-height');
-          });
+          $elem.css('max-height', 0);
+          heightOffset = -dataHeight;
         }
 
         alterParentHeight($parent, heightOffset);
