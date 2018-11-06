@@ -20,9 +20,11 @@
         var clickedElement = $(e.currentTarget); // Set 'selected' class on the clicked folder.
 
         $('.selected').removeClass('selected');
-        clickedElement.addClass('selected'); // Set 'current folder' label.
+        clickedElement.addClass('selected'); // Set 'current folder' label and ID.
 
-        $('.js-current-folder').html(clickedElement.children('span').html()); // Display the loader.
+        var $currentFolder = $('.js-current-folder');
+        $currentFolder.html(clickedElement.children('span').html());
+        $currentFolder.attr('data-folder-id', clickedElement.attr('data-id')); // Display the loader.
 
         $('.loader-container').removeClass('hidden'); // Refresh the overview.
 

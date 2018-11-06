@@ -52,12 +52,17 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
           $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
         } else {
-          // If folders are present, add move option and build the folder list.
+          // If sibling folders are present or we are not in the root directory,
+          // add move option and build the folder list.
           var $folders = $('.overview-item__folder');
+          var currentFolder = $('.js-current-folder').attr('data-folder-id');
 
-          if ($folders[0]) {
+          if ($folders[0] || currentFolder) {
             var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
-            var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
+            var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>'); // Add 'move to parent' option.
+
+            $folderList.append("<li class=\"option\" data-action=\"move-parent\">".concat(Drupal.t('Parent folder'), "</li>")); // Add move options for sibling folders.
+
             $folders.each(function (index, elem) {
               var dataId = $(elem).attr('data-id');
               var folderName = $(elem).find('.overview-item__folder__label').html();
@@ -75,22 +80,82 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         }
 
         $('.js-media-folder-browser').append($menuWrapper.append($menu));
-        this.domElement = $menu; // todo: Add event listeners
-
         $menu.find('[data-action]').each(function (index, elem) {
           elem.addEventListener('click', function () {
-            return _this.actionHandler(elem);
+            return _this.actionHandler($(elem));
           });
         });
       }
     }, {
       key: "actionHandler",
       value: function actionHandler(elem) {
-        console.log(elem);
-        console.log(this.target);
-        console.log(this.type);
-        console.log(this.x);
-        console.log(this.y);
+        switch (elem.attr('data-action')) {
+          case 'add-folder':
+            break;
+
+          case 'add-media':
+            break;
+
+          case 'move':
+            this.moveAction(elem.attr('data-id'));
+            break;
+
+          case 'move-parent':
+            this.moveParentAction();
+            break;
+
+          case 'edit':
+            break;
+
+          case 'rename':
+            break;
+
+          case 'delete':
+            break;
+
+          default:
+            console.log('action not recognised');
+        }
+      }
+    }, {
+      key: "moveAction",
+      value: function moveAction(folderId) {
+        if (this.type === 'media') {
+          var mediaId = this.target.attr('data-id');
+          var endpoint = Drupal.url("media-folder/move-media/".concat(mediaId, "/").concat(folderId));
+          var status = Drupal.ajax({
+            url: endpoint
+          }).execute();
+
+          if (status) {
+            // Display the loader.
+            $('.loader-container').removeClass('hidden'); // Refresh the overview.
+
+            Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
+          }
+        } else {
+          console.log('execute move folder action');
+        }
+      }
+    }, {
+      key: "moveParentAction",
+      value: function moveParentAction() {
+        if (this.type === 'media') {
+          var mediaId = this.target.attr('data-id');
+          var endpoint = Drupal.url("media-folder/move-media-parent/".concat(mediaId));
+          var status = Drupal.ajax({
+            url: endpoint
+          }).execute();
+
+          if (status) {
+            // Display the loader.
+            $('.loader-container').removeClass('hidden'); // Refresh the overview.
+
+            Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
+          }
+        } else {
+          console.log('execute move folder to parent action');
+        }
       }
     }]);
 

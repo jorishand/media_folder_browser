@@ -21,8 +21,10 @@
         // Set 'selected' class on the clicked folder.
         $('.selected').removeClass('selected');
         clickedElement.addClass('selected');
-        // Set 'current folder' label.
-        $('.js-current-folder').html(clickedElement.children('span').html());
+        // Set 'current folder' label and ID.
+        const $currentFolder = $('.js-current-folder');
+        $currentFolder.html(clickedElement.children('span').html());
+        $currentFolder.attr('data-folder-id', clickedElement.attr('data-id'));
         // Display the loader.
         $('.loader-container').removeClass('hidden');
         // Refresh the overview.

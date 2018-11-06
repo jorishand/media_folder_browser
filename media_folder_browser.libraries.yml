@@ -6,9 +6,16 @@ common:
   js:
     js/mfb_common.js: {}
 
+refresh-command:
+  js:
+    js/mfb_refresh_command.js: {}
+  dependencies:
+    - core/drupal.ajax
+
 browser:
   dependencies:
       - media_folder_browser/common
+      - media_folder_browser/refresh-command
       - core/jquery
       - core/jquery.once
       - core/drupal

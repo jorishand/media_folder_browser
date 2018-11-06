@@ -7,6 +7,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Renderer;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\media_folder_browser\Ajax\RefreshMFBCommand;
 use Drupal\media_folder_browser\Entity\FolderEntity;
 use Drupal\media_folder_browser\FolderStructureService;
 use Drupal\media_folder_browser\MediaHelperService;
@@ -119,6 +120,11 @@ class MediaFolderController extends ControllerBase {
   public function refreshResults(Request $request) {
     $response = new AjaxResponse();
     $folder_id = $request->query->get('id');
+
+    if (!$folder_id) {
+      // $folder_id should be NULL instead of an empty string.
+      $folder_id = NULL;
+    }
 
     $results = $this->getFolderContents($folder_id);
     $results = $this->renderer->render($results);
@@ -300,24 +306,78 @@ class MediaFolderController extends ControllerBase {
    *
    * @param int $media_id
    *   ID of the media entity.
-   * @param int $folder_id
-   *   ID of the folder.
+   * @param int|null $folder_id
+   *   ID of the folder or null for root.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   A redirect response.
    */
-  public function moveMedia(int $media_id, int $folder_id) {
-    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
-    if ($folder = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id)) {
-      /** @var \Drupal\media\Entity\Media $media */
-      if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
-        $file = $this->mediaHelper->getMediaFile($media);
-        $dest = $this->buildUri($folder) . '/' . $file->getFilename();
-        $moved_file = file_move($file, $dest);
-        if ($moved_file) {
-          $media->set('field_parent_folder', $folder_id);
-          $media->save();
+  public function moveMedia(int $media_id, $folder_id) {
+    $response = new AjaxResponse();
+
+    /** @var \Drupal\media\Entity\Media $media */
+    if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
+      // Save current folder for the refresh command.
+      $current_folder = $media->get('field_parent_folder')->referencedEntities();
+      if (empty($current_folder)) {
+        $current_folder_id = NULL;
+      }
+      else {
+        $current_folder_id = $current_folder[0]->id();
+      }
+      // Move the file entity to the new folder.
+      $file = $this->mediaHelper->getMediaFile($media);
+      if ($folder_id !== NULL) {
+        /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+        if ($folder = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id)) {
+          $dest = $this->buildUri($folder) . '/' . $file->getFilename();
         }
+      }
+      else {
+        // Move to root if the folder ID is NULL.
+        $dest = 'public://';
+      }
+      $moved_file = file_move($file, $dest);
+      if ($moved_file) {
+        if ($folder_id !== NULL) {
+          $media->set('field_parent_folder', $folder_id);
+        }
+        else {
+          $media->set('field_parent_folder', NULL);
+        }
+        $media->save();
+        $response->addCommand(new RefreshMFBCommand($current_folder_id));
+      }
+    }
+    // ToDo: error responses and watchdog warnings.
+    return $response;
+  }
+
+  /**
+   * Callback to move a media entity to the parenting folder.
+   *
+   * @param int $media_id
+   *   ID of the media entity.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   A redirect response.
+   */
+  public function moveMediaParent(int $media_id) {
+    // Load media entity.
+    /** @var \Drupal\media\Entity\Media $media */
+    if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
+      // Get parent folder entity.
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+      $folder = $media->get('field_parent_folder')->referencedEntities()[0];
+      if ($folder) {
+        // Get folder entity parent ID.
+        /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent_folder */
+        $parent_folder = $folder->get('parent')->referencedEntities()[0];
+        $parent_folder_id = NULL;
+        if ($parent_folder) {
+          $parent_folder_id = $parent_folder->id();
+        }
+        return $this->moveMedia($media_id, $parent_folder_id);
       }
     }
     // ToDo: error responses and watchdog warnings.

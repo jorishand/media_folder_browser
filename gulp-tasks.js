@@ -23,19 +23,19 @@ module.exports = function(gulp, plugins, options) {
   // Defining gulp tasks.
   gulp.task('js', function() {
     return gulp.src(options.es6Src + '/*.es6.js')
-    .pipe(plugins.babel({
-      presets: ['@babel/preset-env']
-    }))
-    .on('error', handleError)
-    .pipe(plugins.extReplace('.js', '.es6.js'))
-    .pipe(gulp.dest(options.jsDest));
+      .pipe(plugins.babel({
+        presets: ['@babel/preset-env']
+      }))
+      .on('error', handleError)
+      .pipe(plugins.extReplace('.js', '.es6.js'))
+      .pipe(gulp.dest(options.jsDest));
   });
 
   gulp.task('js:lint', function() {
     return gulp.src(options.es6Src + '/*.es6.js')
-    .pipe(plugins.eslint())
-    .pipe(plugins.eslint.format())
-    .pipe(plugins.eslint.failOnError());
+      .pipe(plugins.eslint())
+      .pipe(plugins.eslint.format())
+      .pipe(plugins.eslint.failOnError());
   });
 
   gulp.task('sass', function() {

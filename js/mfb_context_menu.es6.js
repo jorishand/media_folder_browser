@@ -39,12 +39,19 @@
         $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
       }
       else {
-        // If folders are present, add move option and build the folder list.
+        // If sibling folders are present or we are not in the root directory,
+        // add move option and build the folder list.
         const $folders = $('.overview-item__folder');
-        if ($folders[0]) {
+        const currentFolder = $('.js-current-folder').attr('data-folder-id');
+
+        if ($folders[0] || currentFolder) {
           const $moveAction = $(`<li class="option">${Drupal.t('Move to')}</li>`);
           const $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
 
+          // Add 'move to parent' option.
+          $folderList.append(`<li class="option" data-action="move-parent">${Drupal.t('Parent folder')}</li>`);
+
+          // Add move options for sibling folders.
           $folders.each((index, elem) => {
             const dataId = $(elem).attr('data-id');
             const folderName = $(elem).find('.overview-item__folder__label').html();
@@ -64,20 +71,66 @@
 
       $('.js-media-folder-browser').append($menuWrapper.append($menu));
 
-      this.domElement = $menu;
-
-      // todo: Add event listeners
       $menu.find('[data-action]').each((index, elem) => {
-        elem.addEventListener('click', () => this.actionHandler(elem));
+        elem.addEventListener('click', () => this.actionHandler($(elem)));
       });
     }
 
     actionHandler(elem) {
-      console.log(elem);
-      console.log(this.target);
-      console.log(this.type);
-      console.log(this.x);
-      console.log(this.y);
+      switch (elem.attr('data-action')) {
+        case 'add-folder':
+          break;
+        case 'add-media':
+          break;
+        case 'move':
+          this.moveAction(elem.attr('data-id'));
+          break;
+        case 'move-parent':
+          this.moveParentAction();
+          break;
+        case 'edit':
+          break;
+        case 'rename':
+          break;
+        case 'delete':
+          break;
+        default:
+          console.log('action not recognised');
+      }
+    }
+
+    moveAction(folderId) {
+      if (this.type === 'media') {
+        const mediaId = this.target.attr('data-id');
+        const endpoint = Drupal.url(`media-folder/move-media/${mediaId}/${folderId}`);
+        const status = Drupal.ajax({ url: endpoint }).execute();
+        if (status) {
+          // Display the loader.
+          $('.loader-container').removeClass('hidden');
+          // Refresh the overview.
+          Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
+        }
+      }
+      else {
+        console.log('execute move folder action');
+      }
+    }
+
+    moveParentAction() {
+      if (this.type === 'media') {
+        const mediaId = this.target.attr('data-id');
+        const endpoint = Drupal.url(`media-folder/move-media-parent/${mediaId}`);
+        const status = Drupal.ajax({ url: endpoint }).execute();
+        if (status) {
+          // Display the loader.
+          $('.loader-container').removeClass('hidden');
+          // Refresh the overview.
+          Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
+        }
+      }
+      else {
+        console.log('execute move folder to parent action');
+      }
     }
   }
 

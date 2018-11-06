@@ -9,7 +9,7 @@
     /**
      * Reloads the contents of the browser overview.
      *
-     * @param {number} id
+     * @param {number|null} id
      *   ID of the folder for which the contents should be displayed in the
      *   overview.
      */
