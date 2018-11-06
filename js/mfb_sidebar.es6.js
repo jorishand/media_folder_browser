@@ -17,7 +17,7 @@
       $('.js-tree-item, .js-folder-item', context).click((e) => {
         e.preventDefault();
         const clickedElement = $(e.currentTarget);
-        const dataId = clickedElement.attr('data-id');
+        let dataId = clickedElement.attr('data-id');
 
         // Set 'selected' class on the clicked folder.
         $('.selected').removeClass('selected');
@@ -29,6 +29,9 @@
         // Display the loader.
         $('.loader-container').removeClass('hidden');
         // Refresh the overview.
+        if (dataId === 'root') {
+          dataId = null;
+        }
         Drupal.mfbCommon.reload(dataId);
       });
     },

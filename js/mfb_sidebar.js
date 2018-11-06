@@ -29,6 +29,10 @@
 
         $('.loader-container').removeClass('hidden'); // Refresh the overview.
 
+        if (dataId === 'root') {
+          dataId = null;
+        }
+
         Drupal.mfbCommon.reload(dataId);
       });
     }

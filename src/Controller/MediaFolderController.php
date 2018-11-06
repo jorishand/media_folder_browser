@@ -146,9 +146,12 @@ class MediaFolderController extends ControllerBase {
    */
   public function getFolderContents(int $folder_id = NULL) {
     $results = [];
+    $folder_entity = NULL;
 
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
-    $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id);
+    if ($folder_id) {
+      $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id);
+    }
     if ($folder_entity) {
       $folders = $this->folderStructure->getFolderChildren($folder_entity);
       $media = $this->folderStructure->getFolderMediaChildren($folder_entity);
@@ -368,14 +371,14 @@ class MediaFolderController extends ControllerBase {
     if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
       // Get parent folder entity.
       /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
-      $folder = $media->get('field_parent_folder')->referencedEntities()[0];
-      if ($folder) {
+      $folder_ref = $media->get('field_parent_folder')->referencedEntities();
+      if (!empty($folder_ref)) {
+        $folder = $folder_ref[0];
         // Get folder entity parent ID.
-        /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent_folder */
-        $parent_folder = $folder->get('parent')->referencedEntities()[0];
+        $parent_folder_ref = $folder->get('parent')->referencedEntities();
         $parent_folder_id = NULL;
-        if ($parent_folder) {
-          $parent_folder_id = $parent_folder->id();
+        if (!empty($parent_folder_ref)) {
+          $parent_folder_id = $parent_folder_ref[0]->id();
         }
         return $this->moveMedia($media_id, $parent_folder_id);
       }

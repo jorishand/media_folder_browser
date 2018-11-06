@@ -39,29 +39,31 @@
         $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
       }
       else {
-        // If sibling folders are present or we are not in the root directory,
-        // add move option and build the folder list.
-        const $folders = $('.overview-item__folder');
-        const currentFolder = $('.js-current-folder').attr('data-folder-id');
-
-        if ($folders[0] || currentFolder) {
-          const $moveAction = $(`<li class="option">${Drupal.t('Move to')}</li>`);
-          const $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
-
-          // Add 'move to parent' option.
-          $folderList.append(`<li class="option" data-action="move-parent">${Drupal.t('Parent folder')}</li>`);
-
-          // Add move options for sibling folders.
-          $folders.each((index, elem) => {
-            const dataId = $(elem).attr('data-id');
-            const folderName = $(elem).find('.overview-item__folder__label').html();
-            $folderList.append(`<li class="option" data-action="move" data-id="${dataId}">${folderName}</li>`);
-          });
-
-          $menu.append($moveAction.append($folderList));
-        }
-
         if (this.type === 'media') {
+          // If sibling folders are present or we are not in the root directory,
+          // add move option and build the folder list.
+          const $folders = $('.overview-item__folder');
+          const currentFolder = $('.js-current-folder').attr('data-folder-id');
+
+          if ($folders[0] || currentFolder) {
+            const $moveAction = $(`<li class="option">${Drupal.t('Move to')}</li>`);
+            const $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
+
+            // Add 'move to parent' option.
+            if (currentFolder && currentFolder !== 'root') {
+              $folderList.append(`<li class="option" data-action="move-parent">${Drupal.t('Parent folder')}</li>`);
+            }
+
+            // Add move options for sibling folders.
+            $folders.each((index, elem) => {
+              const dataId = $(elem).attr('data-id');
+              const folderName = $(elem).find('.overview-item__folder__label').html();
+              $folderList.append(`<li class="option" data-action="move" data-id="${dataId}">${folderName}</li>`);
+            });
+
+            $menu.append($moveAction.append($folderList));
+          }
+
           $menu.append($(`<li class="option" data-action="edit">${Drupal.t('Edit')}</li>`));
         }
 
