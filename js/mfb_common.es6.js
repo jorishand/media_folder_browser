@@ -13,17 +13,12 @@
      *   overview.
      */
     reload: (id) => {
-      $.get('/media-folder-browser/overview/refresh', { id }, (data) => {
-        // Mock a drupal.ajax response to correctly parse data.
-        const ajaxObject = Drupal.ajax({
-          url: '',
-          base: false,
-          element: false,
-          progress: false,
-        });
-
-        ajaxObject.success(data, 'success');
-      });
+      // If the id is not defined, replace it with an  empty string.
+      if (typeof id === 'undefined' || id === null) {
+        id = '';
+      }
+      const endpoint = Drupal.url(`media-folder-browser/overview/refresh/${id}`);
+      Drupal.ajax({ url: endpoint }).execute();
     },
   };
 })(jQuery, Drupal);

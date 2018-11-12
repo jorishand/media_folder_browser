@@ -114,6 +114,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             break;
 
           case 'delete':
+            this.deleteAction();
             break;
 
           default:
@@ -124,18 +125,12 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       key: "moveAction",
       value: function moveAction(folderId) {
         if (this.type === 'media') {
+          $('.loader-container').removeClass('hidden');
           var mediaId = this.target.attr('data-id');
           var endpoint = Drupal.url("media-folder/move-media/".concat(mediaId, "/").concat(folderId));
-          var status = Drupal.ajax({
+          Drupal.ajax({
             url: endpoint
           }).execute();
-
-          if (status) {
-            // Display the loader.
-            $('.loader-container').removeClass('hidden'); // Refresh the overview.
-
-            Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
-          }
         } else {
           console.log('execute move folder action');
         }
@@ -144,20 +139,27 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       key: "moveParentAction",
       value: function moveParentAction() {
         if (this.type === 'media') {
+          $('.loader-container').removeClass('hidden');
           var mediaId = this.target.attr('data-id');
           var endpoint = Drupal.url("media-folder/move-media-parent/".concat(mediaId));
-          var status = Drupal.ajax({
+          Drupal.ajax({
             url: endpoint
           }).execute();
-
-          if (status) {
-            // Display the loader.
-            $('.loader-container').removeClass('hidden'); // Refresh the overview.
-
-            Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
-          }
         } else {
           console.log('execute move folder to parent action');
+        }
+      }
+    }, {
+      key: "deleteAction",
+      value: function deleteAction() {
+        if (this.type === 'media') {
+          $('.loader-container').removeClass('hidden');
+          var mediaId = this.target.attr('data-id');
+          console.log(mediaId);
+          var endpoint = Drupal.url("media-folder-browser/remove-media/".concat(mediaId));
+          Drupal.ajax({
+            url: endpoint
+          }).execute();
         }
       }
     }]);

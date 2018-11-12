@@ -95,6 +95,7 @@
         case 'rename':
           break;
         case 'delete':
+          this.deleteAction();
           break;
         default:
           console.log('action not recognised');
@@ -103,15 +104,10 @@
 
     moveAction(folderId) {
       if (this.type === 'media') {
+        $('.loader-container').removeClass('hidden');
         const mediaId = this.target.attr('data-id');
         const endpoint = Drupal.url(`media-folder/move-media/${mediaId}/${folderId}`);
-        const status = Drupal.ajax({ url: endpoint }).execute();
-        if (status) {
-          // Display the loader.
-          $('.loader-container').removeClass('hidden');
-          // Refresh the overview.
-          Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
-        }
+        Drupal.ajax({ url: endpoint }).execute();
       }
       else {
         console.log('execute move folder action');
@@ -120,18 +116,23 @@
 
     moveParentAction() {
       if (this.type === 'media') {
+        $('.loader-container').removeClass('hidden');
         const mediaId = this.target.attr('data-id');
         const endpoint = Drupal.url(`media-folder/move-media-parent/${mediaId}`);
-        const status = Drupal.ajax({ url: endpoint }).execute();
-        if (status) {
-          // Display the loader.
-          $('.loader-container').removeClass('hidden');
-          // Refresh the overview.
-          Drupal.mfbCommon.reload($('.js-current-folder').attr('data-folder-id'));
-        }
+        Drupal.ajax({ url: endpoint }).execute();
       }
       else {
         console.log('execute move folder to parent action');
+      }
+    }
+
+    deleteAction() {
+      if (this.type === 'media') {
+        $('.loader-container').removeClass('hidden');
+        const mediaId = this.target.attr('data-id');
+        console.log(mediaId);
+        const endpoint = Drupal.url(`media-folder-browser/remove-media/${mediaId}`);
+        Drupal.ajax({ url: endpoint }).execute();
       }
     }
   }

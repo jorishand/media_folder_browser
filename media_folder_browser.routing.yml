@@ -15,7 +15,7 @@ folder.add:
 folder.delete:
   path: '/media-folder/remove/{folder_id}'
   defaults:
-    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::removeFolder'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::removeFolder'
   requirements:
     _permission: 'administer media folder browser'
 
@@ -43,6 +43,17 @@ folder_media.move_parent:
       media_id:
         type: int
 
+folder_media.delete:
+  path: '/media-folder-browser/remove-media/{media_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::removeMedia'
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      media_id:
+        type: int
+
 folder_browser.view:
   path: '/media-folder-browser/overview'
   defaults:
@@ -51,11 +62,16 @@ folder_browser.view:
     _permission: 'administer media folder browser'
 
 folder_browser.refresh:
-  path: '/media-folder-browser/overview/refresh'
+  path: '/media-folder-browser/overview/refresh/{folder_id}'
   defaults:
     _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::refreshResults'
+    folder_id: null
   requirements:
     _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int|null
 
 folder_browser.add_media:
   path: '/media-folder-browser/add-media/{folder_id}'

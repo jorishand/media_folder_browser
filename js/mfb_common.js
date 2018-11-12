@@ -14,18 +14,15 @@
      *   overview.
      */
     reload: function reload(id) {
-      $.get('/media-folder-browser/overview/refresh', {
-        id: id
-      }, function (data) {
-        // Mock a drupal.ajax response to correctly parse data.
-        var ajaxObject = Drupal.ajax({
-          url: '',
-          base: false,
-          element: false,
-          progress: false
-        });
-        ajaxObject.success(data, 'success');
-      });
+      // If the id is not defined, replace it with an  empty string.
+      if (typeof id === 'undefined' || id === null) {
+        id = '';
+      }
+
+      var endpoint = Drupal.url("media-folder-browser/overview/refresh/".concat(id));
+      Drupal.ajax({
+        url: endpoint
+      }).execute();
     }
   };
 })(jQuery, Drupal);
