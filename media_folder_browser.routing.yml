@@ -1,5 +1,5 @@
 folder.add:
-  path: '/media-folder/add/{name}/{parent_id}'
+  path: '/media-folder-browser/add-folder/{parent_id}'
   defaults:
     _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::addFolder'
     parent_id: null
@@ -7,8 +7,6 @@ folder.add:
     _permission: 'administer media folder browser'
   options:
     parameters:
-      name:
-        type: string
       parent_id:
         type: int|null
 

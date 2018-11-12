@@ -273,17 +273,40 @@ class MediaFolderController extends ControllerBase {
   /**
    * Creates a new folder entity.
    *
-   * @param string $name
-   *   Name of the folder.
    * @param int|null $parent_id
    *   ID of the parent folder.
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   A redirect response.
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response.
    */
-  public function addFolder(string $name, int $parent_id = NULL) {
+  public function addFolder(int $parent_id = NULL) {
     // Add folder entity to storage.
     $storage = $this->entityTypeManager->getStorage('folder_entity');
+
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent_entity */
+    $parent_entity = $this->entityTypeManager->getStorage('folder_entity')->load($parent_id);
+
+    if ($parent_entity) {
+      $folders = $this->folderStructure->getFolderChildren($parent_entity);
+    }
+    else {
+      $folders = $this->folderStructure->getRootFolders();
+    }
+
+    // Get all sibling folder names as an array.
+    $folder_names = array_map(function ($folder) {
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+      return $folder->get('name')->value;
+    }, $folders);
+
+    // Create a unique folder name.
+    $name = 'New folder';
+    $i = 1;
+    while (in_array($name, $folder_names)) {
+      $name = 'New folder ' . $i;
+      $i++;
+    }
+
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
     $folder_entity = $storage->create([
       'name' => $name,
@@ -294,7 +317,8 @@ class MediaFolderController extends ControllerBase {
     $uri = $this->buildUri($folder_entity);
     $this->fileSystem->mkdir($uri, NULL, TRUE);
 
-    return $this->redirect('<front>');
+    $response = new AjaxResponse();
+    return $response->addCommand(new RefreshMFBCommand($parent_id));
   }
 
   /**

@@ -49,8 +49,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         var $menu = $('<ul class="context-options">');
 
         if (this.type === 'overview') {
-          $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
-          $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
+          $menu.append($("<li class=\"option js-submit-add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
+          $menu.append($("<li class=\"option js-submit-add-media\">".concat(Drupal.t('Add media'), "</li>")));
         } else {
           if (this.type === 'media') {
             // If sibling folders are present or we are not in the root directory,
@@ -93,12 +93,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       key: "actionHandler",
       value: function actionHandler(elem) {
         switch (elem.attr('data-action')) {
-          case 'add-folder':
-            break;
-
-          case 'add-media':
-            break;
-
           case 'move':
             this.moveAction(elem.attr('data-id'));
             break;

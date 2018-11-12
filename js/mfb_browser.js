@@ -99,4 +99,30 @@
       });
     }
   };
+  /**
+   * Handles the addition of a new folder entity after 'add folder' is clicked.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for adding new folders.
+   */
+
+  Drupal.behaviors.addFolder = {
+    attach: function attach(context) {
+      $('.js-submit-add-folder', context).click(function (e) {
+        e.preventDefault();
+        var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+
+        if (typeof id === 'undefined' || id === null) {
+          id = '';
+        }
+
+        var endpoint = Drupal.url("media-folder-browser/add-folder/".concat(id));
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
+      });
+    }
+  };
 })(jQuery, Drupal);
