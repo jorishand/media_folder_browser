@@ -357,7 +357,7 @@ class MediaFolderController extends ControllerBase {
    *   ID of the media entity.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
-   *   A redirect response.
+   *   An Ajax response.
    */
   public function moveMediaParent(int $media_id) {
     // Load media entity.
@@ -388,12 +388,24 @@ class MediaFolderController extends ControllerBase {
    * @param int $folder_id
    *   ID of the folder.
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   A redirect response.
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response.
    */
   public function removeFolder(int $folder_id = NULL) {
-    $this->recursiveDelete($folder_id);
-    return $this->redirect('<front>');
+    $storage = $this->entityTypeManager->getStorage('folder_entity');
+    $entity = $storage->load($folder_id);
+    $response = new AjaxResponse();
+
+    if ($entity) {
+      $parent_folder_id = $entity->get('parent')->target_id;
+      $this->recursiveDelete($folder_id);
+      // Todo: refresh sidebar as well.
+      return $response
+        ->addCommand(new RefreshMFBCommand($parent_folder_id));
+    }
+
+    return $response
+      ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
   }
 
   /**

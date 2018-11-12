@@ -127,13 +127,16 @@
     }
 
     deleteAction() {
+      $('.loader-container').removeClass('hidden');
+      const id = this.target.attr('data-id');
+      let endpoint = '';
       if (this.type === 'media') {
-        $('.loader-container').removeClass('hidden');
-        const mediaId = this.target.attr('data-id');
-        console.log(mediaId);
-        const endpoint = Drupal.url(`media-folder-browser/remove-media/${mediaId}`);
-        Drupal.ajax({ url: endpoint }).execute();
+        endpoint = Drupal.url(`media-folder-browser/remove-media/${id}`);
       }
+      else {
+        endpoint = Drupal.url(`media-folder-browser/remove-folder/${id}`);
+      }
+      Drupal.ajax({ url: endpoint }).execute();
     }
   }
 

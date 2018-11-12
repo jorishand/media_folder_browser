@@ -152,15 +152,19 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     }, {
       key: "deleteAction",
       value: function deleteAction() {
+        $('.loader-container').removeClass('hidden');
+        var id = this.target.attr('data-id');
+        var endpoint = '';
+
         if (this.type === 'media') {
-          $('.loader-container').removeClass('hidden');
-          var mediaId = this.target.attr('data-id');
-          console.log(mediaId);
-          var endpoint = Drupal.url("media-folder-browser/remove-media/".concat(mediaId));
-          Drupal.ajax({
-            url: endpoint
-          }).execute();
+          endpoint = Drupal.url("media-folder-browser/remove-media/".concat(id));
+        } else {
+          endpoint = Drupal.url("media-folder-browser/remove-folder/".concat(id));
         }
+
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
       }
     }]);
 
