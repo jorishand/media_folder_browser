@@ -471,7 +471,6 @@ class MediaFolderController extends ControllerBase {
   public function openForm(int $folder_id = NULL) {
     $response = new AjaxResponse();
 
-    // Todo: find a better way to pass folder id than using args.
     $form = $this->formBuilder->getForm(MediaFolderUploadForm::class, $folder_id);
 
     $replace = new HtmlCommand('.js-upload-wrapper', $form);

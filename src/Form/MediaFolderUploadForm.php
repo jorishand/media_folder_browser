@@ -74,6 +74,13 @@ class MediaFolderUploadForm extends FormBase {
   protected $mediumStyleExists = FALSE;
 
   /**
+   * The id of the active folder.
+   *
+   * @var int
+   */
+  protected $folderId = NULL;
+
+  /**
    * Constructs a new MediaLibraryUploadForm.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -107,28 +114,44 @@ class MediaFolderUploadForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state, $folder_id = NULL) {
+    $this->folderId = $folder_id;
+
     $form['#prefix'] = '<div id="media-library-upload-wrapper">';
     $form['#suffix'] = '</div>';
 
     $form['#attached']['library'][] = 'media_library/style';
-
     $form['#attributes']['class'][] = 'media-library-upload';
 
     if (empty($this->media) && empty($this->files)) {
       $process = (array) $this->elementInfo->getInfoProperty('managed_file', '#process', []);
       $upload_validators = $this->mergeUploadValidators($this->getTypes());
-      $form['upload'] = [
+      $form['upload_container'] = [
+        '#type' => 'fieldset',
+      ];
+      $form['upload_container']['upload'] = [
         '#type' => 'managed_file',
         '#title' => $this->t('Upload'),
         '#process' => array_merge(['::validateUploadElement'], $process, ['::processUploadElement']),
         '#upload_validators' => $upload_validators,
       ];
-      $form['upload_help'] = [
+      $form['upload_container']['upload_help'] = [
         '#theme' => 'file_upload_help',
         '#description' => $this->t('Upload files here to add new media.'),
         '#upload_validators' => $upload_validators,
       ];
+      // Todo: when https://www.drupal.org/project/drupal/issues/2793343 gets
+      // resolved, put these in an actions element.
+      $form['cancel'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Cancel'),
+        '#name' => 'cancel',
+        '#ajax' => [
+          'callback' => '::closeForm',
+          'wrapper' => 'media-library-upload-wrapper',
+        ],
+      ];
+
     }
     else {
       $form['media'] = [
@@ -217,12 +240,23 @@ class MediaFolderUploadForm extends FormBase {
           ];
         }
       }
+      // Todo: when https://www.drupal.org/project/drupal/issues/2793343 gets
+      // resolved, put these in an actions element.
+      $form['cancel'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Cancel'),
+        '#name' => 'cancel',
+        '#ajax' => [
+          'callback' => '::closeForm',
+          'wrapper' => 'media-library-upload-wrapper',
+        ],
+      ];
 
       $form['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Save'),
         '#ajax' => [
-          'callback' => '::updateWidget',
+          'callback' => '::closeForm',
           'wrapper' => 'media-library-upload-wrapper',
         ],
       ];
@@ -279,10 +313,31 @@ class MediaFolderUploadForm extends FormBase {
     }
     $i = $element['#media_library_index'];
     $type = $element['#media_library_type'];
-    $build_info = $form_state->getBuildInfo();
-    $this->media[] = $this->createMediaEntity($this->files[$i], $this->getTypes()[$type], $build_info['args'][0]);
+    $this->media[] = $this->createMediaEntity($this->files[$i], $this->getTypes()[$type], $this->folderId);
     unset($this->files[$i]);
     $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback to close the form and refreshing the overview after doign so.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Response containing the commands needed to close the form and refresh the
+   *   overview.
+   */
+  public function closeForm(array &$form, FormStateInterface $form_state) {
+    $trigger = $form_state->getTriggeringElement();
+    $response = new AjaxResponse();
+    if ($trigger['#name'] !== 'cancel') {
+      $response->addCommand(new RefreshMFBCommand($this->folderId));
+    }
+    $response->addCommand(new InvokeCommand('.js-upload-wrapper', "addClass", ['hidden']));
+    return ($response);
   }
 
   /**
@@ -294,12 +349,13 @@ class MediaFolderUploadForm extends FormBase {
    *   The current state of the form.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
-   *   A command to send the selection to the current field widget.
+   *   Response containing the commands needed to close the form and refresh the
+   *   overview.
    */
   public function updateWidget(array &$form, FormStateInterface $form_state) {
     return (new AjaxResponse())
       ->addCommand(new InvokeCommand('.js-upload-wrapper', "addClass", ['hidden']))
-      ->addCommand(new RefreshMFBCommand($form_state->getBuildInfo()['args'][0]));
+      ->addCommand(new RefreshMFBCommand($this->folderId));
   }
 
   /**
@@ -351,13 +407,12 @@ class MediaFolderUploadForm extends FormBase {
   public function uploadButtonSubmit(array $form, FormStateInterface $form_state) {
     $fids = $form_state->getValue('upload', []);
     $files = $this->entityTypeManager->getStorage('file')->loadMultiple($fids);
-    $build_info = $form_state->getBuildInfo();
     /** @var \Drupal\file\FileInterface $file */
     foreach ($files as $file) {
       $types = $this->filterTypesThatAcceptFile($file, $this->getTypes());
       if (!empty($types)) {
         if (count($types) === 1) {
-          $this->media[] = $this->createMediaEntity($file, reset($types), $build_info['args'][0]);
+          $this->media[] = $this->createMediaEntity($file, reset($types), $this->folderId);
         }
         else {
           $this->files[] = $file;
@@ -384,6 +439,7 @@ class MediaFolderUploadForm extends FormBase {
    *   If a file operation failed when moving the upload.
    */
   protected function createMediaEntity(FileInterface $file, MediaTypeInterface $type, $folderId) {
+    /** @var \Drupal\media\MediaInterface $media */
     $media = $this->entityTypeManager->getStorage('media')->create([
       'bundle' => $type->id(),
       'name' => $file->getFilename(),

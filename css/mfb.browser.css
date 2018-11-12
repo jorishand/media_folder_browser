@@ -389,8 +389,11 @@
   transition: height 1s ease-in-out;
   background-color: #fff;
   z-index: 2;
+  will-change: height;
 }
 
-.upload-wrapper .hidden {
+.upload-wrapper.hidden {
+  display: block;
   height: 0;
+  overflow: hidden;
 }

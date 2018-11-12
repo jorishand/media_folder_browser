@@ -317,8 +317,11 @@
   transition: height 1s ease-in-out;
   background-color: $white;
   z-index: 2;
+  will-change: height;
 
-  .hidden {
+  &.hidden {
+    display: block;
     height: 0;
+    overflow: hidden;
   }
 }
