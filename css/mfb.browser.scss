@@ -7,6 +7,7 @@
 
 .media-folder-browser {
   display: flex;
+  position: relative;
   height: 100%;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -63,11 +64,12 @@
 
 .results-wrapper {
   height: calc(100% - 100px);
+  overflow: scroll;
 }
 
 .overview-container {
   display: grid;
-  padding: 15px 0 15px 15px;
+  padding: 15px;
   background-color: $white;
   grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
   grid-auto-rows: 1fr;
@@ -152,6 +154,7 @@
       padding-top: 5px;
       transition: height 0.2s ease-in-out;
       background-color: $white;
+      will-change: height;
     }
 
     &__selection {
@@ -300,5 +303,22 @@
   &:focus {
     background-color: $sidebar-dark-grey;
     color: $white;
+  }
+}
+
+// Upload form wrapper
+.upload-wrapper {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  padding-left: 15px;
+  transition: height 1s ease-in-out;
+  background-color: $white;
+  z-index: 2;
+
+  .hidden {
+    height: 0;
   }
 }

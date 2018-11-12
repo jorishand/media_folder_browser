@@ -56,3 +56,15 @@ folder_browser.refresh:
     _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::refreshResults'
   requirements:
     _permission: 'administer media folder browser'
+
+folder_browser.add_media:
+  path: '/media-folder-browser/add-media/{folder_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::openForm'
+    folder_id: null
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int|null

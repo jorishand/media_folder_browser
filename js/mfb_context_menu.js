@@ -200,7 +200,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
   Drupal.behaviors.hideContextMenu = {
     attach: function attach() {
       $('.media-folder-browser').click(function (e) {
-        e.preventDefault();
         $('.js-context-menu').remove();
       });
     }

@@ -171,7 +171,6 @@
   Drupal.behaviors.hideContextMenu = {
     attach() {
       $('.media-folder-browser').click((e) => {
-        e.preventDefault();
         $('.js-context-menu').remove();
       });
     },

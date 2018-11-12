@@ -62,8 +62,40 @@
           selected += $(elem).attr('data-id');
         });
         $("[data-folder-browser-widget-value=".concat(widgetId, "]")).val(selected);
-        $("[data-folder-browser-widget-update=".concat(widgetId, "]")).trigger('mousedown');
-        $('#drupal-modal').dialog('close');
+        $("[data-folder-browser-widget-update=".concat(widgetId, "]")).trigger('mousedown'); // Close dialog.
+
+        var $dialog = $('#drupal-modal');
+
+        if ($dialog.length) {
+          Drupal.dialog($dialog.get(0)).close();
+          $dialog.remove();
+        }
+      });
+    }
+  };
+  /**
+   * Handles the opening of the upload form when 'add media' is clicked.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for loading the upload form.
+   */
+
+  Drupal.behaviors.addMedia = {
+    attach: function attach(context) {
+      $('.js-submit-add-media', context).click(function (e) {
+        e.preventDefault();
+        var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+
+        if (typeof id === 'undefined' || id === null) {
+          id = '';
+        }
+
+        var endpoint = Drupal.url("media-folder-browser/add-media/".concat(id));
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
       });
     }
   };

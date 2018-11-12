@@ -2,6 +2,7 @@
 
 namespace Drupal\media_folder_browser\Controller;
 
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
@@ -16,6 +17,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
 use Drupal\Core\Ajax\AjaxResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\media_folder_browser\Form\MediaFolderUploadForm;
+use Drupal\Core\Form\FormBuilderInterface;
 
 /**
  * Provides route responses for media folders.
@@ -58,6 +61,13 @@ class MediaFolderController extends ControllerBase {
   protected $renderer;
 
   /**
+   * Form builder interface.
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
    * Constructs a new MediaFolderController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -70,13 +80,16 @@ class MediaFolderController extends ControllerBase {
    *   The media helper service.
    * @param \Drupal\Core\Render\Renderer $renderer
    *   The renderer.
+   * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
+   *   The renderer.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer, FormBuilderInterface $formBuilder) {
     $this->entityTypeManager = $entity_type_manager;
     $this->fileSystem = $file_system;
     $this->folderStructure = $folder_structure_service;
     $this->mediaHelper = $media_helper;
     $this->renderer = $renderer;
+    $this->formBuilder = $formBuilder;
   }
 
   /**
@@ -88,7 +101,8 @@ class MediaFolderController extends ControllerBase {
       $container->get('file_system'),
       $container->get('media_folder_browser.folder_structure'),
       $container->get('media_folder_browser.media_helper'),
-      $container->get('renderer')
+      $container->get('renderer'),
+      $container->get('form_builder')
     );
   }
 
@@ -119,7 +133,7 @@ class MediaFolderController extends ControllerBase {
    */
   public function refreshResults(Request $request) {
     $response = new AjaxResponse();
-    $folder_id = $request->query->get('id');
+    $folder_id = (int) $request->query->get('id');
 
     if (!$folder_id) {
       // $folder_id should be NULL instead of an empty string.
@@ -176,7 +190,7 @@ class MediaFolderController extends ControllerBase {
     foreach ($media as $media_item) {
       $thumbnail = ImageStyle::load('mfb_thumbnail')->buildUrl($media_item->get('thumbnail')[0]->entity->uri->value);
 
-      // ToDo: make this configurable in a config form.
+      // ToDo: Add support for custom media types.
       // Set icon based on media type.
       switch ($media_item->bundle()) {
         case 'image':
@@ -443,6 +457,30 @@ class MediaFolderController extends ControllerBase {
     }
 
     return 'public://' . $uri;
+  }
+
+  /**
+   * Callback to open the add media form.
+   *
+   * @param int|null $folder_id
+   *   The request.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Ajax response.
+   */
+  public function openForm(int $folder_id = NULL) {
+    $response = new AjaxResponse();
+
+    // Todo: find a better way to pass folder id than using args.
+    $form = $this->formBuilder->getForm(MediaFolderUploadForm::class, $folder_id);
+
+    $replace = new HtmlCommand('.js-upload-wrapper', $form);
+    $show_upload = new InvokeCommand('.js-upload-wrapper', 'removeClass', ['hidden']);
+
+    $response->addCommand($replace);
+    $response->addCommand($show_upload);
+
+    return $response;
   }
 
 }
