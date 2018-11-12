@@ -112,6 +112,7 @@
     attach(context) {
       $('.js-submit-add-folder', context).click((e) => {
         e.preventDefault();
+        $('.loader-container').removeClass('hidden');
         let id = $('.js-current-folder').attr('data-folder-id');
         // If the id is not defined, replace it with an  empty string.
         if (typeof id === 'undefined' || id === null) {

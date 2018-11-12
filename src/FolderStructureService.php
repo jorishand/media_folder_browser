@@ -38,6 +38,7 @@ class FolderStructureService {
 
     $nids = \Drupal::entityQuery('folder_entity')
       ->notExists('parent')
+      ->sort('name', 'ASC')
       ->execute();
 
     return $storage->loadMultiple($nids);
@@ -54,21 +55,24 @@ class FolderStructureService {
    */
   public function getFolderChildren(FolderEntity $folder) {
     $storage = $this->entityTypeManager->getStorage('folder_entity');
-    return $storage->loadByProperties(['parent' => $folder->id()]);
+    $entities = $storage->loadByProperties(['parent' => $folder->id()]);
+    uasort($entities, [$this, 'sortByName']);
+    return $entities;
   }
 
   /**
-   * Gets child media entities for a given folder.
+   * Compare function to sort folder entities by name.
    *
-   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folder
-   *   The folder entity.
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $a
+   *   Folder entity a.
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $b
+   *   Folder entity b.
    *
    * @return array
    *   The children.
    */
-  public function getFolderMediaChildren(FolderEntity $folder) {
-    $storage = $this->entityTypeManager->getStorage('media');
-    return $storage->loadByProperties(['field_parent_folder' => $folder->id()]);
+  private function sortByName(FolderEntity $a, FolderEntity $b) {
+    return strcmp($a->get('name')->value, $b->get('name')->value);
   }
 
 }

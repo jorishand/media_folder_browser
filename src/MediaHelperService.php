@@ -4,6 +4,7 @@ namespace Drupal\media_folder_browser;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\media\Entity\Media;
+use Drupal\media_folder_browser\Entity\FolderEntity;
 
 /**
  * Class MediaHelperService.
@@ -55,6 +56,22 @@ class MediaHelperService {
   }
 
   /**
+   * Gets child media entities for a given folder.
+   *
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folder
+   *   The folder entity.
+   *
+   * @return array
+   *   The children.
+   */
+  public function getFolderMediaChildren(FolderEntity $folder) {
+    $storage = $this->entityTypeManager->getStorage('media');
+    $entities = $storage->loadByProperties(['field_parent_folder' => $folder->id()]);
+    uasort($entities, [$this, 'sortByName']);
+    return $entities;
+  }
+
+  /**
    * Gets media entities that have no parent.
    *
    * @return array
@@ -65,9 +82,25 @@ class MediaHelperService {
 
     $nids = \Drupal::entityQuery('media')
       ->notExists('field_parent_folder')
+      ->sort('name', 'ASC')
       ->execute();
 
     return $storage->loadMultiple($nids);
+  }
+
+  /**
+   * Compare function to sort media entities by name.
+   *
+   * @param \Drupal\media\Entity\Media $a
+   *   Folder entity a.
+   * @param \Drupal\media\Entity\Media $b
+   *   Folder entity b.
+   *
+   * @return array
+   *   The children.
+   */
+  private function sortByName(Media $a, Media $b) {
+    return strcmp($a->get('name')->value, $b->get('name')->value);
   }
 
 }

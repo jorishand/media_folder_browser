@@ -161,7 +161,7 @@ class MediaFolderController extends ControllerBase {
     }
     if ($folder_entity) {
       $folders = $this->folderStructure->getFolderChildren($folder_entity);
-      $media = $this->folderStructure->getFolderMediaChildren($folder_entity);
+      $media = $this->mediaHelper->getFolderMediaChildren($folder_entity);
     }
     else {
       $folders = $this->folderStructure->getRootFolders();
@@ -452,7 +452,7 @@ class MediaFolderController extends ControllerBase {
     }
 
     // Remove child media entities.
-    $media_entities = $this->folderStructure->getFolderMediaChildren($folder_entity);
+    $media_entities = $this->mediaHelper->getFolderMediaChildren($folder_entity);
     /** @var \Drupal\media\Entity\Media $media */
     foreach ($media_entities as $media) {
       $media->delete();
