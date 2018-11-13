@@ -4,11 +4,9 @@ namespace Drupal\media_folder_browser\Form;
 
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\CloseDialogCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\TypedData\FieldItemDataDefinition;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -16,18 +14,18 @@ use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\file\FileInterface;
 use Drupal\file\Plugin\Field\FieldType\FileFieldItemList;
 use Drupal\file\Plugin\Field\FieldType\FileItem;
-use Drupal\media\MediaInterface;
 use Drupal\media\MediaTypeInterface;
+use Drupal\media_folder_browser\Ajax\RefreshMFBCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Creates a form to create media entities from uploaded files.
  *
- * @Todo: Replace when Media Library gets stable.
- * This file is a 1/1 copy of the media library upload form.
- * This form should be removed and replaced by the one media library provides
- * once it gets stable.
+ * @Todo: Extend when Media Library gets stable.
+ * This file is a slightly altered version of the media library upload form.
+ * This form should be extended on the one media library provides once it gets
+ * stable.
  *
  * @see \Drupal\media_library\Form\MediaLibraryUploadForm
  */
@@ -76,6 +74,13 @@ class MediaFolderUploadForm extends FormBase {
   protected $mediumStyleExists = FALSE;
 
   /**
+   * The id of the active folder.
+   *
+   * @var int
+   */
+  protected $folderId = NULL;
+
+  /**
    * Constructs a new MediaLibraryUploadForm.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -103,39 +108,50 @@ class MediaFolderUploadForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'media_library_upload_form';
+    return 'mfb_upload_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state, $folder_id = NULL) {
+    $this->folderId = $folder_id;
+
     $form['#prefix'] = '<div id="media-library-upload-wrapper">';
     $form['#suffix'] = '</div>';
 
     $form['#attached']['library'][] = 'media_library/style';
-
     $form['#attributes']['class'][] = 'media-library-upload';
 
     if (empty($this->media) && empty($this->files)) {
       $process = (array) $this->elementInfo->getInfoProperty('managed_file', '#process', []);
       $upload_validators = $this->mergeUploadValidators($this->getTypes());
-      $form['upload'] = [
+      $form['upload_container'] = [
+        '#type' => 'fieldset',
+      ];
+      $form['upload_container']['upload'] = [
         '#type' => 'managed_file',
         '#title' => $this->t('Upload'),
         '#process' => array_merge(['::validateUploadElement'], $process, ['::processUploadElement']),
         '#upload_validators' => $upload_validators,
       ];
-      $form['upload_help'] = [
+      $form['upload_container']['upload_help'] = [
         '#theme' => 'file_upload_help',
         '#description' => $this->t('Upload files here to add new media.'),
         '#upload_validators' => $upload_validators,
       ];
-      $remaining = (int) $this->getRequest()->query->get('media_library_remaining');
-      if ($remaining || $remaining === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) {
-        $form['upload']['#multiple'] = $remaining > 1 || $remaining === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED;
-        $form['upload']['#cardinality'] = $form['upload_help']['#cardinality'] = $remaining;
-      }
+      // Todo: when https://www.drupal.org/project/drupal/issues/2793343 gets
+      // resolved, put these in an actions element.
+      $form['cancel'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Cancel'),
+        '#name' => 'cancel',
+        '#ajax' => [
+          'callback' => '::closeForm',
+          'wrapper' => 'media-library-upload-wrapper',
+        ],
+      ];
+
     }
     else {
       $form['media'] = [
@@ -224,15 +240,23 @@ class MediaFolderUploadForm extends FormBase {
           ];
         }
       }
-
-      $form['actions'] = [
-        '#type' => 'actions',
+      // Todo: when https://www.drupal.org/project/drupal/issues/2793343 gets
+      // resolved, put these in an actions element.
+      $form['cancel'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Cancel'),
+        '#name' => 'cancel',
+        '#ajax' => [
+          'callback' => '::closeForm',
+          'wrapper' => 'media-library-upload-wrapper',
+        ],
       ];
-      $form['actions']['submit'] = [
+
+      $form['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Save'),
         '#ajax' => [
-          'callback' => '::updateWidget',
+          'callback' => '::closeForm',
           'wrapper' => 'media-library-upload-wrapper',
         ],
       ];
@@ -289,9 +313,31 @@ class MediaFolderUploadForm extends FormBase {
     }
     $i = $element['#media_library_index'];
     $type = $element['#media_library_type'];
-    $this->media[] = $this->createMediaEntity($this->files[$i], $this->getTypes()[$type]);
+    $this->media[] = $this->createMediaEntity($this->files[$i], $this->getTypes()[$type], $this->folderId);
     unset($this->files[$i]);
     $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback to close the form and refreshing the overview after doign so.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Response containing the commands needed to close the form and refresh the
+   *   overview.
+   */
+  public function closeForm(array &$form, FormStateInterface $form_state) {
+    $trigger = $form_state->getTriggeringElement();
+    $response = new AjaxResponse();
+    if ($trigger['#name'] !== 'cancel') {
+      $response->addCommand(new RefreshMFBCommand($this->folderId));
+    }
+    $response->addCommand(new InvokeCommand('.js-upload-wrapper', "addClass", ['hidden']));
+    return ($response);
   }
 
   /**
@@ -303,27 +349,13 @@ class MediaFolderUploadForm extends FormBase {
    *   The current state of the form.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
-   *   A command to send the selection to the current field widget.
-   *
-   * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
-   *   If the "media_library_widget_id" query parameter is not present.
+   *   Response containing the commands needed to close the form and refresh the
+   *   overview.
    */
   public function updateWidget(array &$form, FormStateInterface $form_state) {
-    if ($form_state->getErrors()) {
-      return $form;
-    }
-    $widget_id = $this->getRequest()->query->get('media_library_widget_id');
-    if (!$widget_id || !is_string($widget_id)) {
-      throw new BadRequestHttpException('The "media_library_widget_id" query parameter is required and must be a string.');
-    }
-    $mids = array_map(function (MediaInterface $media) {
-      return $media->id();
-    }, $this->media);
-    // Pass the selection to the field widget based on the current widget ID.
     return (new AjaxResponse())
-      ->addCommand(new InvokeCommand("[data-media-library-widget-value=\"$widget_id\"]", 'val', [implode(',', $mids)]))
-      ->addCommand(new InvokeCommand("[data-media-library-widget-update=\"$widget_id\"]", 'trigger', ['mousedown']))
-      ->addCommand(new CloseDialogCommand());
+      ->addCommand(new InvokeCommand('.js-upload-wrapper', "addClass", ['hidden']))
+      ->addCommand(new RefreshMFBCommand($this->folderId));
   }
 
   /**
@@ -361,14 +393,6 @@ class MediaFolderUploadForm extends FormBase {
     if ($form_state->getErrors()) {
       $element['#value'] = [];
     }
-    $values = $form_state->getValue('upload', []);
-    if (count($values['fids']) > $element['#cardinality'] && $element['#cardinality'] !== FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) {
-      $form_state->setError($element, $this->t('A maximum of @count files can be uploaded.', [
-        '@count' => $element['#cardinality'],
-      ]));
-      $form_state->setValue('upload', []);
-      $element['#value'] = [];
-    }
     return $element;
   }
 
@@ -388,7 +412,7 @@ class MediaFolderUploadForm extends FormBase {
       $types = $this->filterTypesThatAcceptFile($file, $this->getTypes());
       if (!empty($types)) {
         if (count($types) === 1) {
-          $this->media[] = $this->createMediaEntity($file, reset($types));
+          $this->media[] = $this->createMediaEntity($file, reset($types), $this->folderId);
         }
         else {
           $this->files[] = $file;
@@ -405,6 +429,8 @@ class MediaFolderUploadForm extends FormBase {
    *   A file for the media source field.
    * @param \Drupal\media\MediaTypeInterface $type
    *   A media type.
+   * @param int|null $folderId
+   *   ID of the parent folder.
    *
    * @return \Drupal\media\MediaInterface
    *   An unsaved media entity.
@@ -412,7 +438,8 @@ class MediaFolderUploadForm extends FormBase {
    * @throws \Exception
    *   If a file operation failed when moving the upload.
    */
-  protected function createMediaEntity(FileInterface $file, MediaTypeInterface $type) {
+  protected function createMediaEntity(FileInterface $file, MediaTypeInterface $type, $folderId) {
+    /** @var \Drupal\media\MediaInterface $media */
     $media = $this->entityTypeManager->getStorage('media')->create([
       'bundle' => $type->id(),
       'name' => $file->getFilename(),
@@ -427,6 +454,13 @@ class MediaFolderUploadForm extends FormBase {
       throw new \Exception("Unable to move file to '$location'");
     }
     $media->set($source_field, $file->id());
+    if ($folderId) {
+      $media->set('field_parent_folder', $folderId);
+    }
+    else {
+      $media->set('field_parent_folder', NULL);
+    }
+
     return $media;
   }
 

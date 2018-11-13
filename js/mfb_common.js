@@ -9,23 +9,20 @@
     /**
      * Reloads the contents of the browser overview.
      *
-     * @param {number} id
+     * @param {number|null} id
      *   ID of the folder for which the contents should be displayed in the
      *   overview.
      */
     reload: function reload(id) {
-      $.get('/media-folder-browser/overview/refresh', {
-        id: id
-      }, function (data) {
-        // Mock a drupal.ajax response to correctly parse data.
-        var ajaxObject = Drupal.ajax({
-          url: '',
-          base: false,
-          element: false,
-          progress: false
-        });
-        ajaxObject.success(data, 'success');
-      });
+      // If the id is not defined, replace it with an  empty string.
+      if (typeof id === 'undefined' || id === null) {
+        id = '';
+      }
+
+      var endpoint = Drupal.url("media-folder-browser/overview/refresh/".concat(id));
+      Drupal.ajax({
+        url: endpoint
+      }).execute();
     }
   };
 })(jQuery, Drupal);

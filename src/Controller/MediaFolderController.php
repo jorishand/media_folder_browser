@@ -2,11 +2,13 @@
 
 namespace Drupal\media_folder_browser\Controller;
 
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Renderer;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\media_folder_browser\Ajax\RefreshMFBCommand;
 use Drupal\media_folder_browser\Entity\FolderEntity;
 use Drupal\media_folder_browser\FolderStructureService;
 use Drupal\media_folder_browser\MediaHelperService;
@@ -14,7 +16,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
 use Drupal\Core\Ajax\AjaxResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\media_folder_browser\Form\MediaFolderUploadForm;
+use Drupal\Core\Form\FormBuilderInterface;
 
 /**
  * Provides route responses for media folders.
@@ -57,6 +60,13 @@ class MediaFolderController extends ControllerBase {
   protected $renderer;
 
   /**
+   * Form builder interface.
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
    * Constructs a new MediaFolderController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -69,13 +79,16 @@ class MediaFolderController extends ControllerBase {
    *   The media helper service.
    * @param \Drupal\Core\Render\Renderer $renderer
    *   The renderer.
+   * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
+   *   The renderer.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer, FormBuilderInterface $formBuilder) {
     $this->entityTypeManager = $entity_type_manager;
     $this->fileSystem = $file_system;
     $this->folderStructure = $folder_structure_service;
     $this->mediaHelper = $media_helper;
     $this->renderer = $renderer;
+    $this->formBuilder = $formBuilder;
   }
 
   /**
@@ -87,7 +100,8 @@ class MediaFolderController extends ControllerBase {
       $container->get('file_system'),
       $container->get('media_folder_browser.folder_structure'),
       $container->get('media_folder_browser.media_helper'),
-      $container->get('renderer')
+      $container->get('renderer'),
+      $container->get('form_builder')
     );
   }
 
@@ -110,15 +124,14 @@ class MediaFolderController extends ControllerBase {
   /**
    * Callback to refresh the overview results.
    *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
+   * @param int|null $folder_id
+   *   ID of the folder or null for root.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   Ajax response.
    */
-  public function refreshResults(Request $request) {
+  public function refreshResults($folder_id = NULL) {
     $response = new AjaxResponse();
-    $folder_id = $request->query->get('id');
 
     $results = $this->getFolderContents($folder_id);
     $results = $this->renderer->render($results);
@@ -133,19 +146,22 @@ class MediaFolderController extends ControllerBase {
    * Gets child folders and media for a specific folder as a renderable array.
    *
    * @param int|null $folder_id
-   *   ID of the folder.
+   *   ID of the folder or null for root.
    *
    * @return array
    *   A render array.
    */
   public function getFolderContents(int $folder_id = NULL) {
     $results = [];
+    $folder_entity = NULL;
 
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
-    $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id);
+    if ($folder_id) {
+      $folder_entity = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id);
+    }
     if ($folder_entity) {
       $folders = $this->folderStructure->getFolderChildren($folder_entity);
-      $media = $this->folderStructure->getFolderMediaChildren($folder_entity);
+      $media = $this->mediaHelper->getFolderMediaChildren($folder_entity);
     }
     else {
       $folders = $this->folderStructure->getRootFolders();
@@ -167,7 +183,7 @@ class MediaFolderController extends ControllerBase {
     foreach ($media as $media_item) {
       $thumbnail = ImageStyle::load('mfb_thumbnail')->buildUrl($media_item->get('thumbnail')[0]->entity->uri->value);
 
-      // ToDo: make this configurable in a config form.
+      // ToDo: Add support for custom media types.
       // Set icon based on media type.
       switch ($media_item->bundle()) {
         case 'image':
@@ -257,17 +273,40 @@ class MediaFolderController extends ControllerBase {
   /**
    * Creates a new folder entity.
    *
-   * @param string $name
-   *   Name of the folder.
    * @param int|null $parent_id
    *   ID of the parent folder.
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   A redirect response.
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response.
    */
-  public function addFolder(string $name, int $parent_id = NULL) {
+  public function addFolder(int $parent_id = NULL) {
     // Add folder entity to storage.
     $storage = $this->entityTypeManager->getStorage('folder_entity');
+
+    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent_entity */
+    $parent_entity = $this->entityTypeManager->getStorage('folder_entity')->load($parent_id);
+
+    if ($parent_entity) {
+      $folders = $this->folderStructure->getFolderChildren($parent_entity);
+    }
+    else {
+      $folders = $this->folderStructure->getRootFolders();
+    }
+
+    // Get all sibling folder names as an array.
+    $folder_names = array_map(function ($folder) {
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+      return $folder->get('name')->value;
+    }, $folders);
+
+    // Create a unique folder name.
+    $name = 'New folder';
+    $i = 1;
+    while (in_array($name, $folder_names)) {
+      $name = 'New folder ' . $i;
+      $i++;
+    }
+
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
     $folder_entity = $storage->create([
       'name' => $name,
@@ -278,7 +317,93 @@ class MediaFolderController extends ControllerBase {
     $uri = $this->buildUri($folder_entity);
     $this->fileSystem->mkdir($uri, NULL, TRUE);
 
-    return $this->redirect('<front>');
+    $response = new AjaxResponse();
+    return $response->addCommand(new RefreshMFBCommand($parent_id));
+  }
+
+  /**
+   * Callback to move a media entity to a different folder.
+   *
+   * @param int $media_id
+   *   ID of the media entity.
+   * @param int|null $folder_id
+   *   ID of the folder or null for root.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   A redirect response.
+   */
+  public function moveMedia(int $media_id, $folder_id) {
+    $response = new AjaxResponse();
+
+    /** @var \Drupal\media\Entity\Media $media */
+    if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
+      // Save current folder for the refresh command.
+      $current_folder = $media->get('field_parent_folder')->referencedEntities();
+      if (empty($current_folder)) {
+        $current_folder_id = NULL;
+      }
+      else {
+        $current_folder_id = $current_folder[0]->id();
+      }
+      // Move the file entity to the new folder.
+      $file = $this->mediaHelper->getMediaFile($media);
+      if ($folder_id !== NULL) {
+        /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+        if ($folder = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id)) {
+          $dest = $this->buildUri($folder) . '/' . $file->getFilename();
+        }
+      }
+      else {
+        // Move to root if the folder ID is NULL.
+        $dest = 'public://';
+      }
+      $moved_file = file_move($file, $dest);
+      if ($moved_file) {
+        if ($folder_id !== NULL) {
+          $media->set('field_parent_folder', $folder_id);
+        }
+        else {
+          $media->set('field_parent_folder', NULL);
+        }
+        $media->save();
+        return $response->addCommand(new RefreshMFBCommand($current_folder_id));
+      }
+    }
+    // ToDo: error responses and watchdog warnings.
+    return $response
+      ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
+  }
+
+  /**
+   * Callback to move a media entity to the parenting folder.
+   *
+   * @param int $media_id
+   *   ID of the media entity.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response.
+   */
+  public function moveMediaParent(int $media_id) {
+    // Load media entity.
+    /** @var \Drupal\media\Entity\Media $media */
+    if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
+      // Get parent folder entity.
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+      $folder_ref = $media->get('field_parent_folder')->referencedEntities();
+      if (!empty($folder_ref)) {
+        $folder = $folder_ref[0];
+        // Get folder entity parent ID.
+        $parent_folder_ref = $folder->get('parent')->referencedEntities();
+        $parent_folder_id = NULL;
+        if (!empty($parent_folder_ref)) {
+          $parent_folder_id = $parent_folder_ref[0]->id();
+        }
+        return $this->moveMedia($media_id, $parent_folder_id);
+      }
+    }
+    // ToDo: error responses and watchdog warnings.
+    return (new AjaxResponse())
+      ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
   }
 
   /**
@@ -287,41 +412,24 @@ class MediaFolderController extends ControllerBase {
    * @param int $folder_id
    *   ID of the folder.
    *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   A redirect response.
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response.
    */
   public function removeFolder(int $folder_id = NULL) {
-    $this->recursiveDelete($folder_id);
-    return $this->redirect('<front>');
-  }
+    $storage = $this->entityTypeManager->getStorage('folder_entity');
+    $entity = $storage->load($folder_id);
+    $response = new AjaxResponse();
 
-  /**
-   * Callback to move a media entity to a different folder.
-   *
-   * @param int $media_id
-   *   ID of the media entity.
-   * @param int $folder_id
-   *   ID of the folder.
-   *
-   * @return \Drupal\Core\Ajax\AjaxResponse
-   *   A redirect response.
-   */
-  public function moveMedia(int $media_id, int $folder_id) {
-    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
-    if ($folder = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id)) {
-      /** @var \Drupal\media\Entity\Media $media */
-      if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
-        $file = $this->mediaHelper->getMediaFile($media);
-        $dest = $this->buildUri($folder) . '/' . $file->getFilename();
-        $moved_file = file_move($file, $dest);
-        if ($moved_file) {
-          $media->set('field_parent_folder', $folder_id);
-          $media->save();
-        }
-      }
+    if ($entity) {
+      $parent_folder_id = $entity->get('parent')->target_id;
+      $this->recursiveDelete($folder_id);
+      // Todo: refresh sidebar as well.
+      return $response
+        ->addCommand(new RefreshMFBCommand($parent_folder_id));
     }
-    // ToDo: error responses and watchdog warnings.
-    return new AjaxResponse();
+
+    return $response
+      ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
   }
 
   /**
@@ -344,7 +452,7 @@ class MediaFolderController extends ControllerBase {
     }
 
     // Remove child media entities.
-    $media_entities = $this->folderStructure->getFolderMediaChildren($folder_entity);
+    $media_entities = $this->mediaHelper->getFolderMediaChildren($folder_entity);
     /** @var \Drupal\media\Entity\Media $media */
     foreach ($media_entities as $media) {
       $media->delete();
@@ -354,6 +462,31 @@ class MediaFolderController extends ControllerBase {
     $storage->delete([$folder_entity]);
     $uri = $this->buildUri($folder_entity);
     $this->fileSystem->rmdir($uri);
+  }
+
+  /**
+   * Callback to delete a media entity.
+   *
+   * @param int $media_id
+   *   ID of the media entity.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An AJAX response.
+   */
+  public function removeMedia(int $media_id) {
+    $storage = $this->entityTypeManager->getStorage('media');
+    $entity = $storage->load($media_id);
+    $response = new AjaxResponse();
+
+    if ($entity) {
+      $folder_id = $entity->get('field_parent_folder')->target_id;
+      $entity->delete();
+      return $response
+        ->addCommand(new RefreshMFBCommand($folder_id));
+    }
+
+    return $response
+      ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
   }
 
   /**
@@ -380,6 +513,29 @@ class MediaFolderController extends ControllerBase {
     }
 
     return 'public://' . $uri;
+  }
+
+  /**
+   * Callback to open the add media form.
+   *
+   * @param int|null $folder_id
+   *   ID of the folder or null for root.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Ajax response.
+   */
+  public function openForm(int $folder_id = NULL) {
+    $response = new AjaxResponse();
+
+    $form = $this->formBuilder->getForm(MediaFolderUploadForm::class, $folder_id);
+
+    $replace = new HtmlCommand('.js-upload-wrapper', $form);
+    $show_upload = new InvokeCommand('.js-upload-wrapper', 'removeClass', ['hidden']);
+
+    $response->addCommand($replace);
+    $response->addCommand($show_upload);
+
+    return $response;
   }
 
 }

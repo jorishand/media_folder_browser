@@ -1,28 +1,31 @@
 folder.add:
-  path: '/media-folder/add/{name}/{parent_id}'
+  path: '/media-folder-browser/add-folder/{parent_id}'
   defaults:
-    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::addFolder'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::addFolder'
     parent_id: null
   requirements:
     _permission: 'administer media folder browser'
   options:
     parameters:
-      name:
-        type: string
       parent_id:
         type: int|null
 
 folder.delete:
-  path: '/media-folder/remove/{folder_id}'
+  path: '/media-folder-browser/remove-folder/{folder_id}'
   defaults:
-    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::removeFolder'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::removeFolder'
+    folder_id: null
   requirements:
     _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int
 
 folder_media.move:
   path: '/media-folder/move-media/{media_id}/{folder_id}'
   defaults:
-    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::moveMedia'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::moveMedia'
   requirements:
     _permission: 'administer media folder browser'
   options:
@@ -32,16 +35,55 @@ folder_media.move:
       folder_id:
         type: int
 
+folder_media.move_parent:
+  path: '/media-folder/move-media-parent/{media_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::moveMediaParent'
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      media_id:
+        type: int
+
+folder_media.delete:
+  path: '/media-folder-browser/remove-media/{media_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::removeMedia'
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      media_id:
+        type: int
+
 folder_browser.view:
   path: '/media-folder-browser/overview'
   defaults:
-    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::renderBrowser'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::renderBrowser'
   requirements:
     _permission: 'administer media folder browser'
 
 folder_browser.refresh:
-  path: '/media-folder-browser/overview/refresh'
+  path: '/media-folder-browser/overview/refresh/{folder_id}'
   defaults:
-    _controller:  '\Drupal\media_folder_browser\Controller\MediaFolderController::refreshResults'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::refreshResults'
+    folder_id: null
   requirements:
     _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int|null
+
+folder_browser.add_media:
+  path: '/media-folder-browser/add-media/{folder_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::openForm'
+    folder_id: null
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int|null

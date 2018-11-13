@@ -66,7 +66,60 @@
 
         $(`[data-folder-browser-widget-value=${widgetId}]`).val(selected);
         $(`[data-folder-browser-widget-update=${widgetId}]`).trigger('mousedown');
-        $('#drupal-modal').dialog('close');
+
+        // Close dialog.
+        const $dialog = $('#drupal-modal');
+        if ($dialog.length) {
+          Drupal.dialog($dialog.get(0)).close();
+          $dialog.remove();
+        }
+      });
+    },
+  };
+
+  /**
+   * Handles the opening of the upload form when 'add media' is clicked.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for loading the upload form.
+   */
+  Drupal.behaviors.addMedia = {
+    attach(context) {
+      $('.js-submit-add-media', context).click((e) => {
+        e.preventDefault();
+        let id = $('.js-current-folder').attr('data-folder-id');
+        // If the id is not defined, replace it with an  empty string.
+        if (typeof id === 'undefined' || id === null) {
+          id = '';
+        }
+        const endpoint = Drupal.url(`media-folder-browser/add-media/${id}`);
+        Drupal.ajax({ url: endpoint }).execute();
+      });
+    },
+  };
+
+  /**
+   * Handles the addition of a new folder entity after 'add folder' is clicked.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for adding new folders.
+   */
+  Drupal.behaviors.addFolder = {
+    attach(context) {
+      $('.js-submit-add-folder', context).click((e) => {
+        e.preventDefault();
+        $('.loader-container').removeClass('hidden');
+        let id = $('.js-current-folder').attr('data-folder-id');
+        // If the id is not defined, replace it with an  empty string.
+        if (typeof id === 'undefined' || id === null) {
+          id = '';
+        }
+        const endpoint = Drupal.url(`media-folder-browser/add-folder/${id}`);
+        Drupal.ajax({ url: endpoint }).execute();
       });
     },
   };

@@ -49,24 +49,32 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         var $menu = $('<ul class="context-options">');
 
         if (this.type === 'overview') {
-          $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
-          $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
+          $menu.append($("<li class=\"option js-submit-add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
+          $menu.append($("<li class=\"option js-submit-add-media\">".concat(Drupal.t('Add media'), "</li>")));
         } else {
-          // If folders are present, add move option and build the folder list.
-          var $folders = $('.overview-item__folder');
-
-          if ($folders[0]) {
-            var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
-            var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
-            $folders.each(function (index, elem) {
-              var dataId = $(elem).attr('data-id');
-              var folderName = $(elem).find('.overview-item__folder__label').html();
-              $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
-            });
-            $menu.append($moveAction.append($folderList));
-          }
-
           if (this.type === 'media') {
+            // If sibling folders are present or we are not in the root directory,
+            // add move option and build the folder list.
+            var $folders = $('.overview-item__folder');
+            var currentFolder = $('.js-current-folder').attr('data-folder-id');
+
+            if ($folders[0] || currentFolder) {
+              var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
+              var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>'); // Add 'move to parent' option.
+
+              if (currentFolder && currentFolder !== 'root') {
+                $folderList.append("<li class=\"option\" data-action=\"move-parent\">".concat(Drupal.t('Parent folder'), "</li>"));
+              } // Add move options for sibling folders.
+
+
+              $folders.each(function (index, elem) {
+                var dataId = $(elem).attr('data-id');
+                var folderName = $(elem).find('.overview-item__folder__label').html();
+                $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
+              });
+              $menu.append($moveAction.append($folderList));
+            }
+
             $menu.append($("<li class=\"option\" data-action=\"edit\">".concat(Drupal.t('Edit'), "</li>")));
           }
 
@@ -75,22 +83,82 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         }
 
         $('.js-media-folder-browser').append($menuWrapper.append($menu));
-        this.domElement = $menu; // todo: Add event listeners
-
         $menu.find('[data-action]').each(function (index, elem) {
           elem.addEventListener('click', function () {
-            return _this.actionHandler(elem);
+            return _this.actionHandler($(elem));
           });
         });
       }
     }, {
       key: "actionHandler",
       value: function actionHandler(elem) {
-        console.log(elem);
-        console.log(this.target);
-        console.log(this.type);
-        console.log(this.x);
-        console.log(this.y);
+        switch (elem.attr('data-action')) {
+          case 'move':
+            this.moveAction(elem.attr('data-id'));
+            break;
+
+          case 'move-parent':
+            this.moveParentAction();
+            break;
+
+          case 'edit':
+            break;
+
+          case 'rename':
+            break;
+
+          case 'delete':
+            this.deleteAction();
+            break;
+
+          default:
+            console.log('action not recognised');
+        }
+      }
+    }, {
+      key: "moveAction",
+      value: function moveAction(folderId) {
+        if (this.type === 'media') {
+          $('.loader-container').removeClass('hidden');
+          var mediaId = this.target.attr('data-id');
+          var endpoint = Drupal.url("media-folder/move-media/".concat(mediaId, "/").concat(folderId));
+          Drupal.ajax({
+            url: endpoint
+          }).execute();
+        } else {
+          console.log('execute move folder action');
+        }
+      }
+    }, {
+      key: "moveParentAction",
+      value: function moveParentAction() {
+        if (this.type === 'media') {
+          $('.loader-container').removeClass('hidden');
+          var mediaId = this.target.attr('data-id');
+          var endpoint = Drupal.url("media-folder/move-media-parent/".concat(mediaId));
+          Drupal.ajax({
+            url: endpoint
+          }).execute();
+        } else {
+          console.log('execute move folder to parent action');
+        }
+      }
+    }, {
+      key: "deleteAction",
+      value: function deleteAction() {
+        $('.loader-container').removeClass('hidden');
+        var id = this.target.attr('data-id');
+        var endpoint = '';
+
+        if (this.type === 'media') {
+          endpoint = Drupal.url("media-folder-browser/remove-media/".concat(id));
+        } else {
+          endpoint = Drupal.url("media-folder-browser/remove-folder/".concat(id));
+        }
+
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
       }
     }]);
 
@@ -132,7 +200,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
   Drupal.behaviors.hideContextMenu = {
     attach: function attach() {
       $('.media-folder-browser').click(function (e) {
-        e.preventDefault();
         $('.js-context-menu').remove();
       });
     }

@@ -14,19 +14,25 @@
    */
   Drupal.behaviors.treeFolderReload = {
     attach(context) {
-      $('.js-tree-item', context).click((e) => {
+      $('.js-tree-item, .js-folder-item', context).click((e) => {
         e.preventDefault();
         const clickedElement = $(e.currentTarget);
+        let dataId = clickedElement.attr('data-id');
 
         // Set 'selected' class on the clicked folder.
         $('.selected').removeClass('selected');
-        clickedElement.addClass('selected');
-        // Set 'current folder' label.
-        $('.js-current-folder').html(clickedElement.children('span').html());
+        $(`[data-id=${dataId}]`).addClass('selected');
+        // Set 'current folder' label and ID.
+        const $currentFolder = $('.js-current-folder');
+        $currentFolder.html(clickedElement.children('span').html());
+        $currentFolder.attr('data-folder-id', dataId);
         // Display the loader.
         $('.loader-container').removeClass('hidden');
         // Refresh the overview.
-        Drupal.mfbCommon.reload(clickedElement.attr('data-id'));
+        if (dataId === 'root') {
+          dataId = null;
+        }
+        Drupal.mfbCommon.reload(dataId);
       });
     },
   };
