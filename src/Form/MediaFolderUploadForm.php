@@ -341,24 +341,6 @@ class MediaFolderUploadForm extends FormBase {
   }
 
   /**
-   * AJAX callback to update the field widget.
-   *
-   * @param array $form
-   *   An associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
-   *
-   * @return \Drupal\Core\Ajax\AjaxResponse
-   *   Response containing the commands needed to close the form and refresh the
-   *   overview.
-   */
-  public function updateWidget(array &$form, FormStateInterface $form_state) {
-    return (new AjaxResponse())
-      ->addCommand(new InvokeCommand('.js-upload-wrapper', "addClass", ['hidden']))
-      ->addCommand(new RefreshMFBCommand($this->folderId));
-  }
-
-  /**
    * Processes an upload (managed_file) element.
    *
    * @param array $element

@@ -10,20 +10,30 @@ use Drupal\Core\Ajax\CommandInterface;
 class RefreshMFBCommand implements CommandInterface {
 
   /**
-   * A settings array to be passed to any attached JavaScript behavior.
+   * The ID of the folder to refresh.
    *
    * @var int
    */
   protected $folderId;
 
   /**
+   * Boolean stating wether or not to refresh the sidebar folder structure.
+   *
+   * @var bool
+   */
+  protected $reloadSidebar;
+
+  /**
    * Constructs a RefreshMFBCommand object.
    *
    * @param int|null $folderId
    *   The ID of the folder to refresh.
+   * @param bool $reloadSidebar
+   *   Wether or not to refresh the sidebar.
    */
-  public function __construct($folderId) {
+  public function __construct($folderId, $reloadSidebar = FALSE) {
     $this->folderId = $folderId;
+    $this->reloadSidebar = $reloadSidebar;
   }
 
   /**
@@ -36,6 +46,7 @@ class RefreshMFBCommand implements CommandInterface {
     return [
       'command' => 'mfbRefresh',
       'folderId' => $this->folderId,
+      'reloadSidebar' => $this->reloadSidebar,
     ];
   }
 
