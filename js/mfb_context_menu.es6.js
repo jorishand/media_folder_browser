@@ -42,7 +42,7 @@
         if (this.type === 'media') {
           // If sibling folders are present or we are not in the root directory,
           // add move option and build the folder list.
-          const $folders = $('.overview-item__folder');
+          const $folders = $('.js-folder-item');
           const currentFolder = $('.js-current-folder').attr('data-folder-id');
 
           if ($folders[0] || currentFolder) {
@@ -100,9 +100,9 @@
 
     moveAction(folderId) {
       if (this.type === 'media') {
-        $('.loader-container').removeClass('hidden');
+        $('.js-loader').removeClass('hidden');
         const mediaId = this.target.attr('data-id');
-        const endpoint = Drupal.url(`media-folder/move-media/${mediaId}/${folderId}`);
+        const endpoint = Drupal.url(`media-folder-browser/media/move/${mediaId}/${folderId}`);
         Drupal.ajax({ url: endpoint }).execute();
       }
       else {
@@ -112,9 +112,9 @@
 
     moveParentAction() {
       if (this.type === 'media') {
-        $('.loader-container').removeClass('hidden');
+        $('.js-loader').removeClass('hidden');
         const mediaId = this.target.attr('data-id');
-        const endpoint = Drupal.url(`media-folder/move-media-parent/${mediaId}`);
+        const endpoint = Drupal.url(`media-folder-browser/media/move-parent/${mediaId}`);
         Drupal.ajax({ url: endpoint }).execute();
       }
       else {
@@ -123,14 +123,14 @@
     }
 
     deleteAction() {
-      $('.loader-container').removeClass('hidden');
+      $('.js-loader').removeClass('hidden');
       const id = this.target.attr('data-id');
       let endpoint = '';
       if (this.type === 'media') {
-        endpoint = Drupal.url(`media-folder-browser/remove-media/${id}`);
+        endpoint = Drupal.url(`media-folder-browser/media/remove/${id}`);
       }
       else {
-        endpoint = Drupal.url(`media-folder-browser/remove-folder/${id}`);
+        endpoint = Drupal.url(`media-folder-browser/folder/remove/${id}`);
       }
       Drupal.ajax({ url: endpoint }).execute();
     }
@@ -170,7 +170,7 @@
    */
   Drupal.behaviors.hideContextMenu = {
     attach() {
-      $('.media-folder-browser').click((e) => {
+      $('.js-media-folder-browser').click((e) => {
         $('.js-context-menu').remove();
       });
     },

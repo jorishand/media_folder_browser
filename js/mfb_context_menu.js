@@ -55,7 +55,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           if (this.type === 'media') {
             // If sibling folders are present or we are not in the root directory,
             // add move option and build the folder list.
-            var $folders = $('.overview-item__folder');
+            var $folders = $('.js-folder-item');
             var currentFolder = $('.js-current-folder').attr('data-folder-id');
 
             if ($folders[0] || currentFolder) {
@@ -119,9 +119,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       key: "moveAction",
       value: function moveAction(folderId) {
         if (this.type === 'media') {
-          $('.loader-container').removeClass('hidden');
+          $('.js-loader').removeClass('hidden');
           var mediaId = this.target.attr('data-id');
-          var endpoint = Drupal.url("media-folder/move-media/".concat(mediaId, "/").concat(folderId));
+          var endpoint = Drupal.url("media-folder-browser/media/move/".concat(mediaId, "/").concat(folderId));
           Drupal.ajax({
             url: endpoint
           }).execute();
@@ -133,9 +133,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       key: "moveParentAction",
       value: function moveParentAction() {
         if (this.type === 'media') {
-          $('.loader-container').removeClass('hidden');
+          $('.js-loader').removeClass('hidden');
           var mediaId = this.target.attr('data-id');
-          var endpoint = Drupal.url("media-folder/move-media-parent/".concat(mediaId));
+          var endpoint = Drupal.url("media-folder-browser/media/move-parent/".concat(mediaId));
           Drupal.ajax({
             url: endpoint
           }).execute();
@@ -146,14 +146,14 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     }, {
       key: "deleteAction",
       value: function deleteAction() {
-        $('.loader-container').removeClass('hidden');
+        $('.js-loader').removeClass('hidden');
         var id = this.target.attr('data-id');
         var endpoint = '';
 
         if (this.type === 'media') {
-          endpoint = Drupal.url("media-folder-browser/remove-media/".concat(id));
+          endpoint = Drupal.url("media-folder-browser/media/remove/".concat(id));
         } else {
-          endpoint = Drupal.url("media-folder-browser/remove-folder/".concat(id));
+          endpoint = Drupal.url("media-folder-browser/folder/remove/".concat(id));
         }
 
         Drupal.ajax({
@@ -199,7 +199,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.hideContextMenu = {
     attach: function attach() {
-      $('.media-folder-browser').click(function (e) {
+      $('.js-media-folder-browser').click(function (e) {
         $('.js-context-menu').remove();
       });
     }
