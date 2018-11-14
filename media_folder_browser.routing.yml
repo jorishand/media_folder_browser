@@ -76,6 +76,13 @@ folder_browser.refresh:
       folder_id:
         type: int|null
 
+folder_browser.refresh_sidebar:
+  path: '/media-folder-browser/sidebar/refresh'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::refreshSidebar'
+  requirements:
+    _permission: 'administer media folder browser'
+
 folder_browser.add_media:
   path: '/media-folder-browser/add-media/{folder_id}'
   defaults:

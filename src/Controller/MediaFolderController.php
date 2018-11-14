@@ -143,6 +143,23 @@ class MediaFolderController extends ControllerBase {
   }
 
   /**
+   * Callback to refresh the sidebar folder tree.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Ajax response.
+   */
+  public function refreshSidebar() {
+    $response = new AjaxResponse();
+
+    $results = $this->getFolderTree();
+    $results = $this->renderer->render($results);
+
+    $response->addCommand(new ReplaceCommand('.js-sidebar', $results));
+
+    return $response;
+  }
+
+  /**
    * Gets child folders and media for a specific folder as a renderable array.
    *
    * @param int|null $folder_id
@@ -318,7 +335,7 @@ class MediaFolderController extends ControllerBase {
     $this->fileSystem->mkdir($uri, NULL, TRUE);
 
     $response = new AjaxResponse();
-    return $response->addCommand(new RefreshMFBCommand($parent_id));
+    return $response->addCommand(new RefreshMFBCommand($parent_id, TRUE));
   }
 
   /**
@@ -425,7 +442,7 @@ class MediaFolderController extends ControllerBase {
       $this->recursiveDelete($folder_id);
       // Todo: refresh sidebar as well.
       return $response
-        ->addCommand(new RefreshMFBCommand($parent_folder_id));
+        ->addCommand(new RefreshMFBCommand($parent_folder_id, TRUE));
     }
 
     return $response
