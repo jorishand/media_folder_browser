@@ -233,8 +233,8 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
 
     $dialog_options = Json::encode([
       'dialogClass' => 'folder-browser-widget-modal',
-      'height' => '75%',
       'width' => '75%',
+      'height' => 700,
       'title' => $this->t('Media folder browser'),
       'appendTo' => '#' . $field_name . '-folder-browser-wrapper' . $id_suffix,
     ]);
