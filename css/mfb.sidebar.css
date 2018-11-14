@@ -13,10 +13,12 @@
 }
 
 .mfb-sidebar {
+  position: relative;
   -webkit-box-flex: 2;
   -webkit-flex: 2;
       -ms-flex: 2;
           flex: 2;
+  padding: 15px 0;
   border-right: 2px solid #191919;
   background-color: #383838;
   font-size: 14px;
@@ -24,9 +26,11 @@
 
 .mfb-sidebar__list {
   position: relative;
+  height: 100%;
   margin: 0;
-  padding: 15px 0 10px 25px;
+  padding-left: 25px;
   list-style: none;
+  overflow: scroll;
 }
 
 .mfb-sidebar__list > .mfb-sidebar__list-item::after {
