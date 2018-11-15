@@ -160,10 +160,21 @@
   margin-top: 5px;
   color: #191919;
   font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .overview-item__folder:hover {
   opacity: 0.7;
+}
+
+.overview-item__folder.editable__label {
+  text-overflow: clip;
+}
+
+.overview-item__folder.editable:hover {
+  opacity: 1;
 }
 
 .overview-item__media {
@@ -176,16 +187,17 @@
           box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
 }
 
-.overview-item__media:hover, .overview-item__media:active {
+.overview-item__media.editable, .overview-item__media:hover, .overview-item__media:active {
   -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
           box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
 }
 
-.overview-item__media:hover .overview-item__media__info, .overview-item__media:active .overview-item__media__info {
+.overview-item__media.editable .overview-item__media__info, .overview-item__media:hover .overview-item__media__info, .overview-item__media:active .overview-item__media__info {
   height: 55px;
 }
 
-.overview-item__media:hover .info_details__size,
+.overview-item__media.editable .info_details__size,
+.overview-item__media.editable .info_details__type, .overview-item__media:hover .info_details__size,
 .overview-item__media:hover .info_details__type, .overview-item__media:active .info_details__size,
 .overview-item__media:active .info_details__type {
   opacity: 1;
@@ -272,6 +284,10 @@
   background-size: 16px;
 }
 
+.overview-item__media.editable .info_details__name {
+  text-overflow: clip;
+}
+
 .overview-item__media .info_details {
   width: 70%;
   float: right;
@@ -287,10 +303,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
-}
-
-.overview-item__media .info_details__name.editable {
-  text-overflow: clip;
 }
 
 .overview-item__media .info_details__size, .overview-item__media .info_details__type {

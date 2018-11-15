@@ -149,7 +149,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       value: function renameAction() {
         var $label = this.target.find('.js-item-label');
         $label.attr('contenteditable', 'true');
-        $label.addClass('editable');
+        this.target.addClass('editable');
         $label.focus();
       }
     }, {
@@ -227,11 +227,12 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
         if ($activeSpan.parent().hasClass('js-folder-item')) {
           endpoint = Drupal.url("media-folder-browser/folder/rename/".concat(id, "/").concat(input));
-        } else {// Todo: create endpoint
+          $activeSpan.parent().removeClass('editable');
+        } else {
+          $activeSpan.closest('.js-media-item').removeClass('editable'); // Todo: create endpoint
           // endpoint = Drupal.url(`media-folder-browser/media/rename/${id}/${input}`);
         }
 
-        $activeSpan.removeClass('editable');
         Drupal.ajax({
           url: endpoint
         }).execute();

@@ -126,7 +126,7 @@
     renameAction() {
       const $label = this.target.find('.js-item-label');
       $label.attr('contenteditable', 'true');
-      $label.addClass('editable');
+      this.target.addClass('editable');
       $label.focus();
     }
 
@@ -197,13 +197,14 @@
 
         if ($activeSpan.parent().hasClass('js-folder-item')) {
           endpoint = Drupal.url(`media-folder-browser/folder/rename/${id}/${input}`);
+          $activeSpan.parent().removeClass('editable');
         }
         else {
+          $activeSpan.closest('.js-media-item').removeClass('editable');
           // Todo: create endpoint
           // endpoint = Drupal.url(`media-folder-browser/media/rename/${id}/${input}`);
         }
 
-        $activeSpan.removeClass('editable');
         Drupal.ajax({ url: endpoint }).execute();
       });
     },

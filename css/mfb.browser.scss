@@ -120,10 +120,23 @@
       margin-top: 5px;
       color: $sidebar-dark-grey;
       font-weight: $weight-semi-bold;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     &:hover {
       opacity: 0.7;
+    }
+
+    &.editable {
+      &__label {
+        text-overflow: clip;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 
@@ -132,6 +145,7 @@
     border-radius: 15px;
     box-shadow: 0 4px 8px 0 $shadow-light;
 
+    &.editable,
     &:hover,
     &:active {
       box-shadow: 0 4px 8px 0 $shadow-dark;
@@ -206,6 +220,10 @@
       background-size: 16px;
     }
 
+    &.editable .info_details__name {
+      text-overflow: clip;
+    }
+
     .info_details {
       width: 70%;
       float: right;
@@ -220,10 +238,6 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
-      }
-
-      &__name.editable {
-        text-overflow: clip;
       }
 
       &__size,
