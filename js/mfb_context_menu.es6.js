@@ -89,6 +89,7 @@
         case 'edit':
           break;
         case 'rename':
+          this.renameAction();
           break;
         case 'delete':
           this.deleteAction();
@@ -120,6 +121,13 @@
       else {
         console.log('execute move folder to parent action');
       }
+    }
+
+    renameAction() {
+      const $label = this.target.find('.js-item-label');
+      $label.attr('contenteditable', 'true');
+      $label.addClass('editable');
+      $label.focus();
     }
 
     deleteAction() {
@@ -172,6 +180,31 @@
     attach() {
       $('.js-media-folder-browser').click((e) => {
         $('.js-context-menu').remove();
+      });
+    },
+  };
+
+  /**
+   * Handles renaming.
+   */
+  Drupal.behaviors.renameItem = {
+    attach() {
+      $('.js-item-label').focusout((e) => {
+        const $activeSpan = $(e.target);
+        const input = $activeSpan.html();
+        const id = $activeSpan.attr('data-id');
+        let endpoint = '';
+
+        if ($activeSpan.parent().hasClass('js-folder-item')) {
+          endpoint = Drupal.url(`media-folder-browser/folder/rename/${id}/${input}`);
+        }
+        else {
+          // Todo: create endpoint
+          // endpoint = Drupal.url(`media-folder-browser/media/rename/${id}/${input}`);
+        }
+
+        $activeSpan.removeClass('editable');
+        Drupal.ajax({ url: endpoint }).execute();
       });
     },
   };

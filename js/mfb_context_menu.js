@@ -105,6 +105,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             break;
 
           case 'rename':
+            this.renameAction();
             break;
 
           case 'delete':
@@ -142,6 +143,14 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         } else {
           console.log('execute move folder to parent action');
         }
+      }
+    }, {
+      key: "renameAction",
+      value: function renameAction() {
+        var $label = this.target.find('.js-item-label');
+        $label.attr('contenteditable', 'true');
+        $label.addClass('editable');
+        $label.focus();
       }
     }, {
       key: "deleteAction",
@@ -201,6 +210,31 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     attach: function attach() {
       $('.js-media-folder-browser').click(function (e) {
         $('.js-context-menu').remove();
+      });
+    }
+  };
+  /**
+   * Handles renaming.
+   */
+
+  Drupal.behaviors.renameItem = {
+    attach: function attach() {
+      $('.js-item-label').focusout(function (e) {
+        var $activeSpan = $(e.target);
+        var input = $activeSpan.html();
+        var id = $activeSpan.attr('data-id');
+        var endpoint = '';
+
+        if ($activeSpan.parent().hasClass('js-folder-item')) {
+          endpoint = Drupal.url("media-folder-browser/folder/rename/".concat(id, "/").concat(input));
+        } else {// Todo: create endpoint
+          // endpoint = Drupal.url(`media-folder-browser/media/rename/${id}/${input}`);
+        }
+
+        $activeSpan.removeClass('editable');
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
       });
     }
   };

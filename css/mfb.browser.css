@@ -281,8 +281,16 @@
 
 .overview-item__media .info_details__name {
   display: block;
+  width: 95%;
   margin-top: 2px;
   font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.overview-item__media .info_details__name.editable {
+  text-overflow: clip;
 }
 
 .overview-item__media .info_details__size, .overview-item__media .info_details__type {

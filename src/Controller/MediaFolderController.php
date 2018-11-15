@@ -354,7 +354,7 @@ class MediaFolderController extends ControllerBase {
 
     /** @var \Drupal\media\Entity\Media $media */
     if ($media = $this->entityTypeManager->getStorage('media')->load($media_id)) {
-      // Save current folder for the refresh command.
+      // Store current folder so it can be used in the refresh command.
       $current_folder = $media->get('field_parent_folder')->referencedEntities();
       if (empty($current_folder)) {
         $current_folder_id = NULL;
@@ -362,18 +362,19 @@ class MediaFolderController extends ControllerBase {
       else {
         $current_folder_id = $current_folder[0]->id();
       }
-      // Move the file entity to the new folder.
+
       $file = $this->mediaHelper->getMediaFile($media);
+
+      // Set destination to root if the folder ID is NULL.
+      $dest = 'public://';
       if ($folder_id !== NULL) {
         /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
         if ($folder = $this->entityTypeManager->getStorage('folder_entity')->load($folder_id)) {
           $dest = $this->buildUri($folder) . '/' . $file->getFilename();
         }
       }
-      else {
-        // Move to root if the folder ID is NULL.
-        $dest = 'public://';
-      }
+
+      // Move the file entity to the new folder.
       $moved_file = file_move($file, $dest);
       if ($moved_file) {
         if ($folder_id !== NULL) {
@@ -440,7 +441,36 @@ class MediaFolderController extends ControllerBase {
     if ($entity) {
       $parent_folder_id = $entity->get('parent')->target_id;
       $this->recursiveDelete($folder_id);
-      // Todo: refresh sidebar as well.
+      return $response
+        ->addCommand(new RefreshMFBCommand($parent_folder_id, TRUE));
+    }
+
+    return $response
+      ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
+  }
+
+  /**
+   * Callback to rename a folder entity.
+   *
+   * @param int $folder_id
+   *   ID of the folder.
+   * @param string $input
+   *   ID of the folder.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An Ajax response.
+   */
+  public function renameFolder(int $folder_id, string $input) {
+    $storage = $this->entityTypeManager->getStorage('folder_entity');
+    $entity = $storage->load($folder_id);
+    $response = new AjaxResponse();
+
+    if ($entity) {
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $entity */
+      $entity->setName($input);
+      $entity->save();
+      // Todo: rename directory in filesystem.
+      $parent_folder_id = $entity->get('parent')->target_id;
       return $response
         ->addCommand(new RefreshMFBCommand($parent_folder_id, TRUE));
     }

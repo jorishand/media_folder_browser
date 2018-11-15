@@ -55,7 +55,7 @@ mfb.folder.remove:
 mfb.folder.rename:
   path: '/media-folder-browser/folder/rename/{folder_id}/{input}'
   defaults:
-    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::removeFolder'
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::renameFolder'
   requirements:
     _permission: 'administer media folder browser'
   options:

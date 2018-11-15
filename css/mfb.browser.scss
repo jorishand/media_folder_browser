@@ -214,8 +214,16 @@
 
       &__name {
         display: block;
+        width: 95%;
         margin-top: 2px;
         font-weight: $weight-semi-bold;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      &__name.editable {
+        text-overflow: clip;
       }
 
       &__size,
