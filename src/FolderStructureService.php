@@ -75,4 +75,21 @@ class FolderStructureService {
     return strcmp($a->get('name')->value, $b->get('name')->value);
   }
 
+  /**
+   * Delete a folder tree from the file system.
+   *
+   * @param string $dir
+   *   Uri of the directory.
+   *
+   * @return array
+   *   The children.
+   */
+  public function delTree($dir) {
+    $children = array_diff(scandir($dir), ['.', '..']);
+    foreach ($children as $child) {
+      (is_dir("$dir/$child")) ? $this->delTree("$dir/$child") : unlink("$dir/$child");
+    }
+    return rmdir($dir);
+  }
+
 }

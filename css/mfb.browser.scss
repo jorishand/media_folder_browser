@@ -117,9 +117,11 @@
     }
 
     &__label {
+      width: 100%;
       margin-top: 5px;
       color: $sidebar-dark-grey;
       font-weight: $weight-semi-bold;
+      text-align: center;
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
@@ -130,8 +132,9 @@
     }
 
     &.editable {
-      &__label {
+      .overview-item__folder__label {
         text-overflow: clip;
+        cursor: text;
       }
 
       &:hover {
@@ -145,6 +148,7 @@
     border-radius: 15px;
     box-shadow: 0 4px 8px 0 $shadow-light;
 
+    &.focused,
     &.editable,
     &:hover,
     &:active {
@@ -220,8 +224,13 @@
       background-size: 16px;
     }
 
-    &.editable .info_details__name {
-      text-overflow: clip;
+    &.editable .overview-item__media__info {
+      z-index: 2;
+
+      .info_details__name {
+        text-overflow: clip;
+        cursor: text;
+      }
     }
 
     .info_details {
@@ -272,6 +281,7 @@
     padding: 10px 20px;
     font-size: 14px;
     font-weight: $weight-semi-bold;
+    white-space: nowrap;
     cursor: pointer;
 
     &:hover {
@@ -338,7 +348,7 @@
   padding-left: 15px;
   transition: height 1s ease-in-out;
   background-color: $white;
-  z-index: 2;
+  z-index: 3;
   will-change: height;
 
   &.hidden {

@@ -65,6 +65,30 @@ mfb.folder.rename:
       input:
         type: string
 
+mfb.folder.move:
+  path: '/media-folder-browser/folder/move/{folder_id}/{dest_folder_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::moveFolder'
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int
+      dest_folder_id:
+        type: int
+
+mfb.folder.move_parent:
+  path: '/media-folder-browser/folder/move-parent/{folder_id}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::moveFolderParent'
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      folder_id:
+        type: int
+
 # Media entity related routes
 
 mfb.media.add:

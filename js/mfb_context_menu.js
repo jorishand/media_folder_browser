@@ -19,7 +19,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
    * @param {jQuery} target
    *   The target element.
    * @param {string} type
-   *   The type of context menu, this will determine which options will be shown.
+   *   The type of context menu, this will determine which options will be
+   *     shown.
    * @param {number} x
    *   The X position for the context menu.
    * @param {number} y
@@ -53,29 +54,30 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           $menu.append($("<li class=\"option js-submit-add-media\">".concat(Drupal.t('Add media'), "</li>")));
         } else {
           if (this.type === 'media') {
-            // If sibling folders are present or we are not in the root directory,
-            // add move option and build the folder list.
-            var $folders = $('.js-folder-item');
-            var currentFolder = $('.js-current-folder').attr('data-folder-id');
-
-            if ($folders[0] || currentFolder) {
-              var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
-              var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>'); // Add 'move to parent' option.
-
-              if (currentFolder && currentFolder !== 'root') {
-                $folderList.append("<li class=\"option\" data-action=\"move-parent\">".concat(Drupal.t('Parent folder'), "</li>"));
-              } // Add move options for sibling folders.
-
-
-              $folders.each(function (index, elem) {
-                var dataId = $(elem).attr('data-id');
-                var folderName = $(elem).find('.overview-item__folder__label').html();
-                $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
-              });
-              $menu.append($moveAction.append($folderList));
-            }
-
+            // The edit option is unique to media.
             $menu.append($("<li class=\"option\" data-action=\"edit\">".concat(Drupal.t('Edit'), "</li>")));
+          } // If sibling folders are present or we are not in the root directory,
+          // add move option and build the folder list.
+
+
+          var $folders = $('.js-folder-item');
+          var currentFolder = $('.js-current-folder').attr('data-folder-id');
+
+          if ($folders[0] || currentFolder) {
+            var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
+            var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>'); // Add 'move to parent' option.
+
+            if (currentFolder && currentFolder !== 'root') {
+              $folderList.append("<li class=\"option\" data-action=\"move-parent\">".concat(Drupal.t('Parent folder'), "</li>"));
+            } // Add move options for sibling folders.
+
+
+            $folders.each(function (index, elem) {
+              var dataId = $(elem).attr('data-id');
+              var folderName = $(elem).find('.overview-item__folder__label').html();
+              $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
+            });
+            $menu.append($moveAction.append($folderList));
           }
 
           $menu.append($("<li class=\"option\" data-action=\"rename\">".concat(Drupal.t('Rename'), "</li>")));
@@ -127,7 +129,14 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             url: endpoint
           }).execute();
         } else {
-          console.log('execute move folder action');
+          $('.js-loader').removeClass('hidden');
+          var selectedFolderId = this.target.attr('data-id');
+
+          var _endpoint = Drupal.url("media-folder-browser/folder/move/".concat(selectedFolderId, "/").concat(folderId));
+
+          Drupal.ajax({
+            url: _endpoint
+          }).execute();
         }
       }
     }, {
@@ -141,7 +150,14 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             url: endpoint
           }).execute();
         } else {
-          console.log('execute move folder to parent action');
+          $('.js-loader').removeClass('hidden');
+          var selectedFolderId = this.target.attr('data-id');
+
+          var _endpoint2 = Drupal.url("media-folder-browser/folder/move-parent/".concat(selectedFolderId));
+
+          Drupal.ajax({
+            url: _endpoint2
+          }).execute();
         }
       }
     }, {
@@ -198,6 +214,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       $('.js-media-item').bind('contextmenu', function (e) {
         e.preventDefault();
         var context = new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
+        $(e.currentTarget).addClass('focused');
         context.render();
       });
     }
@@ -208,8 +225,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.hideContextMenu = {
     attach: function attach() {
-      $('.js-media-folder-browser').click(function (e) {
+      $('.js-media-folder-browser').click(function () {
         $('.js-context-menu').remove();
+        $('.focused').removeClass('focused');
       });
     }
   };
@@ -219,7 +237,19 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.renameItem = {
     attach: function attach() {
-      $('.js-item-label').focusout(function (e) {
+      var $label = $('.js-item-label'); // Prevent the parent click event (select) from being triggered.
+
+      $label.click(function (e) {
+        e.stopPropagation();
+      }); // Trigger focusout when pressing enter.
+
+      $label.keydown(function (e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          $(e.target).blur();
+        }
+      });
+      $label.focusout(function (e) {
         var $activeSpan = $(e.target);
         var input = $activeSpan.html();
         var id = $activeSpan.attr('data-id');
