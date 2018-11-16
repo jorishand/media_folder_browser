@@ -18,6 +18,8 @@ use Drupal\media\MediaTypeInterface;
 use Drupal\media_folder_browser\Ajax\RefreshMFBCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Drupal\Core\File\FileSystem;
+use Drupal\media_folder_browser\FolderStructureService;
 
 /**
  * Creates a form to create media entities from uploaded files.
@@ -81,6 +83,20 @@ class MediaFolderUploadForm extends FormBase {
   protected $folderId = NULL;
 
   /**
+   * File system.
+   *
+   * @var \Drupal\Core\File\FileSystem
+   */
+  protected $fileSystem;
+
+  /**
+   * Folder structure service.
+   *
+   * @var \Drupal\media_folder_browser\FolderStructureService
+   */
+  protected $folderStructure;
+
+  /**
    * Constructs a new MediaLibraryUploadForm.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -88,10 +104,12 @@ class MediaFolderUploadForm extends FormBase {
    * @param \Drupal\Core\Render\ElementInfoManagerInterface $element_info
    *   The element info manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ElementInfoManagerInterface $element_info) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ElementInfoManagerInterface $element_info, FileSystem $file_system, FolderStructureService $folder_structure_service) {
     $this->entityTypeManager = $entity_type_manager;
     $this->elementInfo = $element_info;
     $this->mediumStyleExists = !empty($entity_type_manager->getStorage('image_style')->load('medium'));
+    $this->fileSystem = $file_system;
+    $this->folderStructure = $folder_structure_service;
   }
 
   /**
@@ -100,7 +118,9 @@ class MediaFolderUploadForm extends FormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('element_info')
+      $container->get('element_info'),
+      $container->get('file_system'),
+      $container->get('media_folder_browser.folder_structure')
     );
   }
 
@@ -289,9 +309,21 @@ class MediaFolderUploadForm extends FormBase {
       $source_field = $media->getSource()->getSourceFieldDefinition($media->bundle->entity)->getName();
       /** @var \Drupal\file\FileInterface $file */
       $file = $media->get($source_field)->entity;
+
+      // Move the new file to the correct folder.
+      $folder = $media->get('field_parent_folder')->referencedEntities()[0];
+      $dest = 'public://';
+      if (!empty($folder)) {
+        $dest = $this->folderStructure->buildUri($folder);
+        if (!is_dir($dest)) {
+          $this->fileSystem->mkdir($dest, NULL, TRUE);
+        }
+      }
       $file->setPermanent();
       $file->save();
+
       $media->save();
+      file_move($file, $dest);
     }
   }
 

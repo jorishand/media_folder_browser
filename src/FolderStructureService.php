@@ -92,4 +92,30 @@ class FolderStructureService {
     return rmdir($dir);
   }
 
+  /**
+   * Recursively creates an URI based on the parent folder's name.
+   *
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folderEntity
+   *   Folder entity.
+   * @param string $uri
+   *   URI to start from (used for recursion).
+   *
+   * @return string
+   *   The URI.
+   */
+  public function buildUri(FolderEntity $folderEntity, string $uri = '') {
+    $uri = empty($uri) ? '' : '/' . $uri;
+    $uri = $folderEntity->getName() . $uri;
+
+    if ($folderEntity->hasParent()) {
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent */
+      $parent = $this->entityTypeManager
+        ->getStorage('folder_entity')
+        ->load($folderEntity->get('parent')->target_id);
+      return $this->buildUri($parent, $uri);
+    }
+
+    return 'public://' . $uri;
+  }
+
 }

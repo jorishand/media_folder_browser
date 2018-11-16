@@ -346,7 +346,7 @@ class MediaFolderController extends ControllerBase {
     ]);
     $this->folderStorage->save($folder_entity);
 
-    $uri = $this->buildUri($folder_entity);
+    $uri = $this->folderStructure->buildUri($folder_entity);
     $this->fileSystem->mkdir($uri, NULL, TRUE);
 
     $response = new AjaxResponse();
@@ -408,7 +408,7 @@ class MediaFolderController extends ControllerBase {
       if ($folder_id !== NULL) {
         /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
         if ($folder = $this->folderStorage->load($folder_id)) {
-          $dest = $this->buildUri($folder);
+          $dest = $this->folderStructure->buildUri($folder);
           if (!is_dir($dest)) {
             $this->fileSystem->mkdir($dest, NULL, TRUE);
           }
@@ -490,7 +490,7 @@ class MediaFolderController extends ControllerBase {
       }
 
       // Save the old URI so that the empty folder can be removed afterwards.
-      $oldUri = $this->buildUri($folder);
+      $oldUri = $this->folderStructure->buildUri($folder);
 
       // Change the parent of the folder.
       $folder->set('parent', $dest_folder_id);
@@ -587,7 +587,7 @@ class MediaFolderController extends ControllerBase {
 
     if ($entity) {
       $parent_folder_id = $entity->get('parent')->target_id;
-      $oldUri = $this->buildUri($entity);
+      $oldUri = $this->folderStructure->buildUri($entity);
       $this->recursiveDelete($folder_id);
       $this->folderStructure->delTree($oldUri);
       return $response
@@ -619,7 +619,7 @@ class MediaFolderController extends ControllerBase {
     if ($folder) {
       // Make sure the input differs from the old name before proceeding.
       if (trim($folder->getName()) !== $input) {
-        $oldUri = $this->buildUri($folder);
+        $oldUri = $this->folderStructure->buildUri($folder);
 
         $folder->setName($input);
         $folder->save();
@@ -667,7 +667,7 @@ class MediaFolderController extends ControllerBase {
 
     // Remove directory from file system.
     $this->folderStorage->delete([$folder_entity]);
-    $uri = $this->buildUri($folder_entity);
+    $uri = $this->folderStructure->buildUri($folder_entity);
     $this->fileSystem->rmdir($uri);
   }
 
@@ -693,32 +693,6 @@ class MediaFolderController extends ControllerBase {
 
     return $response
       ->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
-  }
-
-  /**
-   * Recursively creates an URI based on the parent folder's name.
-   *
-   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folderEntity
-   *   Folder entity.
-   * @param string $uri
-   *   URI to start from (used for recursion).
-   *
-   * @return string
-   *   The URI.
-   */
-  private function buildUri(FolderEntity $folderEntity, string $uri = '') {
-    $uri = empty($uri) ? '' : '/' . $uri;
-    $uri = $folderEntity->getName() . $uri;
-
-    if ($folderEntity->hasParent()) {
-      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent */
-      $parent = $this->entityTypeManager
-        ->getStorage('folder_entity')
-        ->load($folderEntity->get('parent')->target_id);
-      return $this->buildUri($parent, $uri);
-    }
-
-    return 'public://' . $uri;
   }
 
   /**
