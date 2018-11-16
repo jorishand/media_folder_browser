@@ -336,7 +336,8 @@ class MediaFolderUploadForm extends FormBase {
     if ($trigger['#name'] !== 'cancel') {
       $response->addCommand(new RefreshMFBCommand($this->folderId));
     }
-    $response->addCommand(new InvokeCommand('.js-upload-wrapper', "addClass", ['hidden']));
+    $response->addCommand(new InvokeCommand('.js-upload-wrapper, .js-loader', "addClass", ['hidden']));
+
     return ($response);
   }
 
