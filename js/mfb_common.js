@@ -36,6 +36,32 @@
           url: endpoint
         }).execute();
       }
+    },
+    addFolder: function addFolder() {
+      $('.js-loader').removeClass('hidden');
+      var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+
+      if (typeof id === 'undefined' || id === null || id === 'root') {
+        id = '';
+      }
+
+      var endpoint = Drupal.url("media-folder-browser/folder/add/".concat(id));
+      Drupal.ajax({
+        url: endpoint
+      }).execute();
+    },
+    addMedia: function addMedia() {
+      $('.js-loader').removeClass('hidden');
+      var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+
+      if (typeof id === 'undefined' || id === null || id === 'root') {
+        id = '';
+      }
+
+      var endpoint = Drupal.url("media-folder-browser/media/add/".concat(id));
+      Drupal.ajax({
+        url: endpoint
+      }).execute();
     }
   };
 })(jQuery, Drupal);

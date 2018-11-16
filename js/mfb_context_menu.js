@@ -50,8 +50,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         var $menu = $('<ul class="context-options">');
 
         if (this.type === 'overview') {
-          $menu.append($("<li class=\"option js-submit-add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
-          $menu.append($("<li class=\"option js-submit-add-media\">".concat(Drupal.t('Add media'), "</li>")));
+          $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
+          $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
         } else {
           if (this.type === 'media') {
             // The edit option is unique to media.
@@ -114,8 +114,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             this.deleteAction();
             break;
 
+          case 'add-folder':
+            Drupal.mfbCommon.addFolder();
+            break;
+
+          case 'add-media':
+            Drupal.mfbCommon.addMedia();
+            break;
+
           default:
-            console.log('action not recognised');
         }
       }
     }, {
@@ -196,7 +203,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.contextMenu = {
     attach: function attach() {
-      $('.js-overview').bind('contextmenu', function (e) {
+      $('.js-results-wrapper, .js-overview').bind('contextmenu', function (e) {
         e.preventDefault(); // Checks if a child was clicked.
 
         if (e.target !== e.currentTarget) {

@@ -30,5 +30,25 @@
         Drupal.ajax({ url: endpoint }).execute();
       }
     },
+    addFolder: () => {
+      $('.js-loader').removeClass('hidden');
+      let id = $('.js-current-folder').attr('data-folder-id');
+      // If the id is not defined, replace it with an  empty string.
+      if (typeof id === 'undefined' || id === null || id === 'root') {
+        id = '';
+      }
+      const endpoint = Drupal.url(`media-folder-browser/folder/add/${id}`);
+      Drupal.ajax({ url: endpoint }).execute();
+    },
+    addMedia: () => {
+      $('.js-loader').removeClass('hidden');
+      let id = $('.js-current-folder').attr('data-folder-id');
+      // If the id is not defined, replace it with an  empty string.
+      if (typeof id === 'undefined' || id === null || id === 'root') {
+        id = '';
+      }
+      const endpoint = Drupal.url(`media-folder-browser/media/add/${id}`);
+      Drupal.ajax({ url: endpoint }).execute();
+    },
   };
 })(jQuery, Drupal);

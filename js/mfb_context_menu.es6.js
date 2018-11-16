@@ -36,8 +36,8 @@
       const $menu = $('<ul class="context-options">');
 
       if (this.type === 'overview') {
-        $menu.append($(`<li class="option js-submit-add-folder">${Drupal.t('Add folder')}</li>`));
-        $menu.append($(`<li class="option js-submit-add-media">${Drupal.t('Add media')}</li>`));
+        $menu.append($(`<li class="option" data-action="add-folder">${Drupal.t('Add folder')}</li>`));
+        $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
       }
       else {
         if (this.type === 'media') {
@@ -95,8 +95,13 @@
         case 'delete':
           this.deleteAction();
           break;
+        case 'add-folder':
+          Drupal.mfbCommon.addFolder();
+          break;
+        case 'add-media':
+          Drupal.mfbCommon.addMedia();
+          break;
         default:
-          console.log('action not recognised');
       }
     }
 
@@ -156,7 +161,7 @@
    */
   Drupal.behaviors.contextMenu = {
     attach() {
-      $('.js-overview').bind('contextmenu', (e) => {
+      $('.js-results-wrapper, .js-overview').bind('contextmenu', (e) => {
         e.preventDefault();
         // Checks if a child was clicked.
         if (e.target !== e.currentTarget) {
