@@ -1,6 +1,4 @@
 <a href="#" data-id="{{ id }}" class="overview-item overview-item__folder js-folder-item">
   <img src="{{ folder_icon }}" class="overview-item__folder__image" alt="folder">
-  <span class="overview-item__folder__label">
-    {{ name }}
-  </span>
+  <span class="overview-item__folder__label js-item-label" data-id="{{ id }}">{{ name|trim }}</span>
 </a>

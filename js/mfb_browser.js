@@ -55,9 +55,9 @@
         e.preventDefault();
         var clickedElement = $(e.currentTarget);
         var widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
-        $('.loader-container').removeClass('hidden');
+        $('.js-loader').removeClass('hidden');
         var selected = '';
-        $('.overview-container').children('.selected').each(function (index, elem) {
+        $('.js-overview').children('.selected').each(function (index, elem) {
           if (selected !== '') selected += ',';
           selected += $(elem).attr('data-id');
         });
@@ -86,16 +86,7 @@
     attach: function attach(context) {
       $('.js-submit-add-media', context).click(function (e) {
         e.preventDefault();
-        var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
-
-        if (typeof id === 'undefined' || id === null || id === 'root') {
-          id = '';
-        }
-
-        var endpoint = Drupal.url("media-folder-browser/add-media/".concat(id));
-        Drupal.ajax({
-          url: endpoint
-        }).execute();
+        Drupal.mfbCommon.addMedia();
       });
     }
   };
@@ -112,17 +103,7 @@
     attach: function attach(context) {
       $('.js-submit-add-folder', context).click(function (e) {
         e.preventDefault();
-        $('.loader-container').removeClass('hidden');
-        var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
-
-        if (typeof id === 'undefined' || id === null || id === 'root') {
-          id = '';
-        }
-
-        var endpoint = Drupal.url("media-folder-browser/add-folder/".concat(id));
-        Drupal.ajax({
-          url: endpoint
-        }).execute();
+        Drupal.mfbCommon.addFolder();
       });
     }
   };

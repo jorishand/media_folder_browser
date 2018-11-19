@@ -19,7 +19,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
    * @param {jQuery} target
    *   The target element.
    * @param {string} type
-   *   The type of context menu, this will determine which options will be shown.
+   *   The type of context menu, this will determine which options will be
+   *     shown.
    * @param {number} x
    *   The X position for the context menu.
    * @param {number} y
@@ -49,33 +50,34 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         var $menu = $('<ul class="context-options">');
 
         if (this.type === 'overview') {
-          $menu.append($("<li class=\"option js-submit-add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
-          $menu.append($("<li class=\"option js-submit-add-media\">".concat(Drupal.t('Add media'), "</li>")));
+          $menu.append($("<li class=\"option\" data-action=\"add-folder\">".concat(Drupal.t('Add folder'), "</li>")));
+          $menu.append($("<li class=\"option\" data-action=\"add-media\">".concat(Drupal.t('Add media'), "</li>")));
         } else {
           if (this.type === 'media') {
-            // If sibling folders are present or we are not in the root directory,
-            // add move option and build the folder list.
-            var $folders = $('.overview-item__folder');
-            var currentFolder = $('.js-current-folder').attr('data-folder-id');
-
-            if ($folders[0] || currentFolder) {
-              var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
-              var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>'); // Add 'move to parent' option.
-
-              if (currentFolder && currentFolder !== 'root') {
-                $folderList.append("<li class=\"option\" data-action=\"move-parent\">".concat(Drupal.t('Parent folder'), "</li>"));
-              } // Add move options for sibling folders.
-
-
-              $folders.each(function (index, elem) {
-                var dataId = $(elem).attr('data-id');
-                var folderName = $(elem).find('.overview-item__folder__label').html();
-                $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
-              });
-              $menu.append($moveAction.append($folderList));
-            }
-
+            // The edit option is unique to media.
             $menu.append($("<li class=\"option\" data-action=\"edit\">".concat(Drupal.t('Edit'), "</li>")));
+          } // If sibling folders are present or we are not in the root directory,
+          // add move option and build the folder list.
+
+
+          var $folders = $('.js-folder-item');
+          var currentFolder = $('.js-current-folder').attr('data-folder-id');
+
+          if ($folders[0] || currentFolder) {
+            var $moveAction = $("<li class=\"option\">".concat(Drupal.t('Move to'), "</li>"));
+            var $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>'); // Add 'move to parent' option.
+
+            if (currentFolder && currentFolder !== 'root') {
+              $folderList.append("<li class=\"option\" data-action=\"move-parent\">".concat(Drupal.t('Parent folder'), "</li>"));
+            } // Add move options for sibling folders.
+
+
+            $folders.each(function (index, elem) {
+              var dataId = $(elem).attr('data-id');
+              var folderName = $(elem).find('.overview-item__folder__label').html();
+              $folderList.append("<li class=\"option\" data-action=\"move\" data-id=\"".concat(dataId, "\">").concat(folderName, "</li>"));
+            });
+            $menu.append($moveAction.append($folderList));
           }
 
           $menu.append($("<li class=\"option\" data-action=\"rename\">".concat(Drupal.t('Rename'), "</li>")));
@@ -105,55 +107,85 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             break;
 
           case 'rename':
+            this.renameAction();
             break;
 
           case 'delete':
             this.deleteAction();
             break;
 
+          case 'add-folder':
+            Drupal.mfbCommon.addFolder();
+            break;
+
+          case 'add-media':
+            Drupal.mfbCommon.addMedia();
+            break;
+
           default:
-            console.log('action not recognised');
         }
       }
     }, {
       key: "moveAction",
       value: function moveAction(folderId) {
         if (this.type === 'media') {
-          $('.loader-container').removeClass('hidden');
+          $('.js-loader').removeClass('hidden');
           var mediaId = this.target.attr('data-id');
-          var endpoint = Drupal.url("media-folder/move-media/".concat(mediaId, "/").concat(folderId));
+          var endpoint = Drupal.url("media-folder-browser/media/move/".concat(mediaId, "/").concat(folderId));
           Drupal.ajax({
             url: endpoint
           }).execute();
         } else {
-          console.log('execute move folder action');
+          $('.js-loader').removeClass('hidden');
+          var selectedFolderId = this.target.attr('data-id');
+
+          var _endpoint = Drupal.url("media-folder-browser/folder/move/".concat(selectedFolderId, "/").concat(folderId));
+
+          Drupal.ajax({
+            url: _endpoint
+          }).execute();
         }
       }
     }, {
       key: "moveParentAction",
       value: function moveParentAction() {
         if (this.type === 'media') {
-          $('.loader-container').removeClass('hidden');
+          $('.js-loader').removeClass('hidden');
           var mediaId = this.target.attr('data-id');
-          var endpoint = Drupal.url("media-folder/move-media-parent/".concat(mediaId));
+          var endpoint = Drupal.url("media-folder-browser/media/move-parent/".concat(mediaId));
           Drupal.ajax({
             url: endpoint
           }).execute();
         } else {
-          console.log('execute move folder to parent action');
+          $('.js-loader').removeClass('hidden');
+          var selectedFolderId = this.target.attr('data-id');
+
+          var _endpoint2 = Drupal.url("media-folder-browser/folder/move-parent/".concat(selectedFolderId));
+
+          Drupal.ajax({
+            url: _endpoint2
+          }).execute();
         }
+      }
+    }, {
+      key: "renameAction",
+      value: function renameAction() {
+        var $label = this.target.find('.js-item-label');
+        $label.attr('contenteditable', 'true');
+        this.target.addClass('editable');
+        $label.focus();
       }
     }, {
       key: "deleteAction",
       value: function deleteAction() {
-        $('.loader-container').removeClass('hidden');
+        $('.js-loader').removeClass('hidden');
         var id = this.target.attr('data-id');
         var endpoint = '';
 
         if (this.type === 'media') {
-          endpoint = Drupal.url("media-folder-browser/remove-media/".concat(id));
+          endpoint = Drupal.url("media-folder-browser/media/remove/".concat(id));
         } else {
-          endpoint = Drupal.url("media-folder-browser/remove-folder/".concat(id));
+          endpoint = Drupal.url("media-folder-browser/folder/remove/".concat(id));
         }
 
         Drupal.ajax({
@@ -171,7 +203,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.contextMenu = {
     attach: function attach() {
-      $('.js-overview').bind('contextmenu', function (e) {
+      $('.js-results-wrapper, .js-overview').bind('contextmenu', function (e) {
         e.preventDefault(); // Checks if a child was clicked.
 
         if (e.target !== e.currentTarget) {
@@ -189,6 +221,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       $('.js-media-item').bind('contextmenu', function (e) {
         e.preventDefault();
         var context = new ContextMenu($(e.currentTarget), 'media', e.clientX, e.clientY);
+        $(e.currentTarget).addClass('focused');
         context.render();
       });
     }
@@ -199,8 +232,47 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.hideContextMenu = {
     attach: function attach() {
-      $('.media-folder-browser').click(function (e) {
+      $('.js-media-folder-browser').click(function () {
         $('.js-context-menu').remove();
+        $('.focused').removeClass('focused');
+      });
+    }
+  };
+  /**
+   * Handles renaming.
+   */
+
+  Drupal.behaviors.renameItem = {
+    attach: function attach() {
+      var $label = $('.js-item-label'); // Prevent the parent click event (select) from being triggered.
+
+      $label.click(function (e) {
+        e.stopPropagation();
+      }); // Trigger focusout when pressing enter.
+
+      $label.keydown(function (e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          $(e.target).blur();
+        }
+      });
+      $label.focusout(function (e) {
+        var $activeSpan = $(e.target);
+        var input = $activeSpan.html();
+        var id = $activeSpan.attr('data-id');
+        var endpoint = '';
+
+        if ($activeSpan.parent().hasClass('js-folder-item')) {
+          endpoint = Drupal.url("media-folder-browser/folder/rename/".concat(id, "/").concat(input));
+          $activeSpan.parent().removeClass('editable');
+        } else {
+          $activeSpan.closest('.js-media-item').removeClass('editable'); // Todo: create endpoint
+          // endpoint = Drupal.url(`media-folder-browser/media/rename/${id}/${input}`);
+        }
+
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
       });
     }
   };

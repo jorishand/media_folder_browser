@@ -243,7 +243,7 @@ class MediaFolderWidget extends WidgetBase implements ContainerFactoryPluginInte
       '#type' => 'link',
       '#title' => $this->t('Add media'),
       '#name' => 'folder-browser-add-button',
-      '#url' => Url::fromRoute('folder_browser.view'),
+      '#url' => Url::fromRoute('mfb.view'),
       '#attributes' => [
         'class' => ['button', 'use-ajax', 'folder-browser-add-button'],
         'data-dialog-type' => 'modal',

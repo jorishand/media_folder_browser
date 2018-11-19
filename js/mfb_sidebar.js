@@ -27,7 +27,7 @@
         $currentFolder.html(clickedElement.children('span').html());
         $currentFolder.attr('data-folder-id', dataId); // Display the loader.
 
-        $('.loader-container').removeClass('hidden'); // Refresh the overview.
+        $('.js-loader').removeClass('hidden'); // Refresh the overview.
 
         if (dataId === 'root') {
           dataId = null;
