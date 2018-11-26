@@ -240,8 +240,10 @@ class MediaFolderController extends ControllerBase {
       }
       $icon = base_path() . drupal_get_path('module', 'media_folder_browser') . $icon;
       $file = $this->mediaHelper->getMediaFile($media_item);
-      $size = $file->getSize();
-      $type = $file->getMimeType();
+
+      $size = $file ? $file->getSize() : '0';
+      $type = $file ? $file->getMimeType() : 'none';
+
       $results[] = [
         '#theme' => 'folder_browser_media_item',
         '#id' => $media_item->id(),
