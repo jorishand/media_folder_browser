@@ -52,7 +52,7 @@ class MFBTest extends WebDriverTestBase {
    */
   public function testWidget() {
     $assert_session = $this->assertSession();
-    $page = $this->getSession()->getPage();
+    $this->getSession()->maximizeWindow();
 
     // Visit a node create page.
     $this->drupalGet('node/add/test_page');
@@ -61,13 +61,28 @@ class MFBTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Media unlimited');
 
     // Click the add media button.
-    $add_button = $page->findLink('Add media');
-    $this->assertTrue($add_button->isVisible(), 'Add media button exists.');
+    $add_button = $assert_session->elementExists('css', '.folder-browser-add-button');
     $add_button->click();
 
     // Check if the browser dialog is opened.
     $assert_session->waitForElementVisible('css', '.ui-dialog');
     $assert_session->pageTextContains('Media folder browser');
+
+    // Check folder addition functionality.
+    $folder_button = $assert_session->elementExists('css', '.js-submit-add-folder');
+    $folder_button->click();
+
+    $folder_item = $assert_session->waitForElementVisible('css', '.js-folder-item[data-id="1"]');
+    $this->assertEquals('New folder', $folder_item->getText());
+
+    // Add a folder using the context menu.
+    $this->getSession()->getPage()->find('css', '.js-results-wrapper')->rightClick();
+
+    $context_folder_button = $assert_session->elementExists('css', '.option[data-action="add-folder"]');
+    $context_folder_button->click();
+
+    $folder_item_2 = $assert_session->waitForElementVisible('css', '.js-folder-item[data-id="2"]');
+    $this->assertEquals('New folder 1', $folder_item_2->getText());
   }
 
 }
