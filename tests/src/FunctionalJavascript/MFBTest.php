@@ -83,6 +83,19 @@ class MFBTest extends WebDriverTestBase {
 
     $folder_item_2 = $assert_session->waitForElementVisible('css', '.js-folder-item[data-id="2"]');
     $this->assertEquals('New folder 1', $folder_item_2->getText());
+
+    // Test renaming functionality.
+    $folder_item->rightClick();
+    $context_rename = $assert_session->elementExists('css', '.option[data-action="rename"]');
+    $context_rename->click();
+
+    $folder_label = $folder_item->find('css', '.js-item-label');
+    $this->assertTrue($folder_label->getAttribute('contenteditable'));
+
+    $folder_label->setValue('test');
+    $folder_label->blur();
+
+    $this->assertEquals('testNew folder', $folder_label->getText());
   }
 
 }
