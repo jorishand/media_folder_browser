@@ -114,10 +114,8 @@ class MFBTest extends WebDriverTestBase {
     $this->assertFalse($upload_wrapper->hasClass('hidden'));
 
     // Click cancel button.
-    $page->pressButton('Cancel');
+    $this->submitForm([], 'Cancel');
     $assert_session->assertWaitOnAjaxRequest();
-
-    $assert_session->waitForElementVisible('css', '.hidden');
 
     $this->assertTrue($upload_wrapper->hasClass('hidden'));
 
@@ -129,11 +127,25 @@ class MFBTest extends WebDriverTestBase {
 
     $assert_session->waitForElementVisible('css', '.mfb-upload-form');
     $this->assertFalse($upload_wrapper->hasClass('hidden'));
-
     // Todo: test upload form.
     // Click cancel button.
-    $page->pressButton('Cancel');
+    $this->submitForm([], 'Cancel');
     $assert_session->assertWaitOnAjaxRequest();
+
+    $this->assertTrue($upload_wrapper->hasClass('hidden'));
+
+    // Move media test.
+    $media_item = $assert_session->elementExists('css', '.js-media-item[data-id="1"]');
+    $media_item->rightClick();
+
+    $move_to_button = $assert_session->elementExists('css', '.option:not([data-action])');
+    $move_to_button->mouseOver();
+    $context_move_option = $assert_session->elementExists('css', '.option[data-action="move"][data-id="1"]');
+    $context_move_option->click();
+    $assert_session->assertWaitOnAjaxRequest();
+
+    $assert_session->pageTextNotContains('test_item');
+
   }
 
 }

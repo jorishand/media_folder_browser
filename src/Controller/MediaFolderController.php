@@ -404,22 +404,26 @@ class MediaFolderController extends ControllerBase {
     /** @var \Drupal\media\Entity\Media $media */
     if ($media = $this->mediaStorage->load($media_id)) {
       $file = $this->mediaHelper->getMediaFile($media);
+      $file_success = TRUE;
 
-      // Set destination to root if the folder ID is NULL.
-      $dest = 'public://';
-      if ($folder_id !== NULL) {
-        /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
-        if ($folder = $this->folderStorage->load($folder_id)) {
-          $dest = $this->folderStructure->buildUri($folder);
-          if (!is_dir($dest)) {
-            $this->fileSystem->mkdir($dest, NULL, TRUE);
+      if ($file) {
+        // Set destination to root if the folder ID is NULL.
+        $dest = 'public://';
+        if ($folder_id !== NULL) {
+          /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+          if ($folder = $this->folderStorage->load($folder_id)) {
+            $dest = $this->folderStructure->buildUri($folder);
+            if (!is_dir($dest)) {
+              $this->fileSystem->mkdir($dest, NULL, TRUE);
+            }
           }
         }
+
+        // Move the file entity to the new folder.
+        $file_success = file_move($file, $dest);
       }
 
-      // Move the file entity to the new folder.
-      $moved_file = file_move($file, $dest);
-      if ($moved_file) {
+      if ($file_success) {
         if ($folder_id !== NULL) {
           $media->set('field_parent_folder', $folder_id);
         }
