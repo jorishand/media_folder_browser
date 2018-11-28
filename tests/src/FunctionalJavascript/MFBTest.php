@@ -53,6 +53,7 @@ class MFBTest extends WebDriverTestBase {
   public function testWidget() {
     $assert_session = $this->assertSession();
     $this->getSession()->maximizeWindow();
+    $page = $this->getSession()->getPage();
 
     // Visit a node create page.
     $this->drupalGet('node/add/test_page');
@@ -61,8 +62,8 @@ class MFBTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Media unlimited');
 
     // Click the add media button.
-    $add_button = $assert_session->elementExists('css', '.folder-browser-add-button');
-    $add_button->click();
+    $open_browser_button = $assert_session->elementExists('css', '.folder-browser-add-button');
+    $open_browser_button->click();
 
     // Check if the browser dialog is opened.
     $assert_session->waitForElementVisible('css', '.ui-dialog');
@@ -76,7 +77,8 @@ class MFBTest extends WebDriverTestBase {
     $this->assertEquals('New folder', $folder_item->getText());
 
     // Add a folder using the context menu.
-    $this->getSession()->getPage()->find('css', '.js-results-wrapper')->rightClick();
+    $results_wrapper = $page->find('css', '.js-results-wrapper');
+    $results_wrapper->rightClick();
 
     $context_folder_button = $assert_session->elementExists('css', '.option[data-action="add-folder"]');
     $context_folder_button->click();
@@ -84,7 +86,7 @@ class MFBTest extends WebDriverTestBase {
     $folder_item_2 = $assert_session->waitForElementVisible('css', '.js-folder-item[data-id="2"]');
     $this->assertEquals('New folder 1', $folder_item_2->getText());
 
-    // Test renaming functionality.
+    // Test folder renaming functionality.
     $folder_item->rightClick();
     $context_rename = $assert_session->elementExists('css', '.option[data-action="rename"]');
     $context_rename->click();
@@ -96,6 +98,42 @@ class MFBTest extends WebDriverTestBase {
     $folder_label->blur();
 
     $this->assertEquals('testNew folder', $folder_label->getText());
+
+    // Check if the folder name has been reloaded correctly in the sidebar.
+    $assert_session->assertWaitOnAjaxRequest();
+
+    $sidebar_folder = $assert_session->elementExists('css', '.js-tree-item[data-id="1"]');
+    $this->assertEquals('testNew folder', $sidebar_folder->find('css', 'span')->getText());
+
+    // Open add media form.
+    $media_button = $assert_session->elementExists('css', '.js-submit-add-media');
+    $media_button->click();
+
+    $assert_session->waitForElementVisible('css', '.mfb-upload-form');
+    $upload_wrapper = $page->find('css', '.js-upload-wrapper');
+    $this->assertFalse($upload_wrapper->hasClass('hidden'));
+
+    // Click cancel button.
+    $page->pressButton('Cancel');
+    $assert_session->assertWaitOnAjaxRequest();
+
+    $assert_session->waitForElementVisible('css', '.hidden');
+
+    $this->assertTrue($upload_wrapper->hasClass('hidden'));
+
+    // Open add media form using the context menu.
+    $results_wrapper->rightClick();
+
+    $context_media_button = $assert_session->elementExists('css', '.option[data-action="add-media"]');
+    $context_media_button->click();
+
+    $assert_session->waitForElementVisible('css', '.mfb-upload-form');
+    $this->assertFalse($upload_wrapper->hasClass('hidden'));
+
+    // Todo: test upload form.
+    // Click cancel button.
+    $page->pressButton('Cancel');
+    $assert_session->assertWaitOnAjaxRequest();
   }
 
 }

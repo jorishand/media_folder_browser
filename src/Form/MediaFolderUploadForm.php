@@ -5,6 +5,7 @@ namespace Drupal\media_folder_browser\Form;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\RemoveCommand;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\TypedData\FieldItemDataDefinition;
@@ -368,6 +369,7 @@ class MediaFolderUploadForm extends FormBase {
     if ($trigger['#name'] !== 'cancel') {
       $response->addCommand(new RefreshMFBCommand($this->folderId));
     }
+    $response->addCommand(new RemoveCommand('#media-library-upload-wrapper'));
     $response->addCommand(new InvokeCommand('.js-upload-wrapper, .js-loader', "addClass", ['hidden']));
 
     return ($response);
