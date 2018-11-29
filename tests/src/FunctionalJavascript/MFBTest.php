@@ -144,8 +144,78 @@ class MFBTest extends WebDriverTestBase {
     $context_move_option->click();
     $assert_session->assertWaitOnAjaxRequest();
 
-    $assert_session->pageTextNotContains('test_item');
+    // Move folder test.
+    $folder_item = $assert_session->elementExists('css', '.js-folder-item[data-id="2"]');
+    $folder_item->rightClick();
 
+    $move_to_button = $assert_session->elementExists('css', '.option:not([data-action])');
+    $move_to_button->mouseOver();
+    $context_move_option = $assert_session->elementExists('css', '.option[data-action="move"][data-id="1"]');
+    $context_move_option->click();
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // Check if moved entities are gone.
+    $assert_session->pageTextNotContains('test_item');
+    $assert_session->elementNotExists('css', '.js-folder-item[data-id="2"]');
+
+    // Move to the other folder using the sidebar.
+    $sidebar_folder->click();
+    $assert_session->waitForElement('css', 'js-results-wrapper');
+
+    $assert_session->pageTextContains('test_item');
+    $assert_session->elementExists('css', '.js-folder-item[data-id="2"]');
+
+    // Move media to parent test.
+    $media_item = $assert_session->elementExists('css', '.js-media-item[data-id="1"]');
+    $media_item->rightClick();
+
+    $move_to_button = $assert_session->elementExists('css', '.option:not([data-action])');
+    $move_to_button->mouseOver();
+    $context_move_option = $assert_session->elementExists('css', '.option[data-action="move-parent"]');
+    $context_move_option->click();
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // Move folder to parent test.
+    $folder_item = $assert_session->elementExists('css', '.js-folder-item[data-id="2"]');
+    $folder_item->rightClick();
+
+    $move_to_button = $assert_session->elementExists('css', '.option:not([data-action])');
+    $move_to_button->mouseOver();
+    $context_move_option = $assert_session->elementExists('css', '.option[data-action="move-parent"]');
+    $context_move_option->click();
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // Check if moved entities are gone.
+    $assert_session->pageTextNotContains('test_item');
+    $assert_session->elementNotExists('css', '.js-folder-item[data-id="2"]');
+
+    // Move back to root using sidebar.
+    $sidebar_root = $assert_session->elementExists('css', '.js-tree-item[data-id="root"]');
+    $sidebar_root->click();
+    $assert_session->waitForElement('css', 'js-results-wrapper');
+
+    $assert_session->pageTextContains('test_item');
+    $assert_session->elementExists('css', '.js-folder-item[data-id="2"]');
+
+    // Test media delete.
+    $media_item = $assert_session->elementExists('css', '.js-media-item[data-id="1"]');
+    $media_item->rightClick();
+
+    $context_delete_option = $assert_session->elementExists('css', '.option[data-action="delete"]');
+    $context_delete_option->click();
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // Test folder delete.
+    $folder_item = $assert_session->elementExists('css', '.js-folder-item[data-id="2"]');
+    $folder_item->rightClick();
+
+    $context_delete_option = $assert_session->elementExists('css', '.option[data-action="delete"]');
+    $context_delete_option->click();
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // Check if deleted entities are gone.
+    $assert_session->pageTextNotContains('test_item');
+    $assert_session->elementNotExists('css', '.js-folder-item[data-id="2"]');
   }
 
 }
