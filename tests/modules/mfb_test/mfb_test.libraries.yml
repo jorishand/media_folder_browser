@@ -1,0 +1,5 @@
+testing.test_css_fix:
+  version: VERSION
+  css:
+    theme:
+      css/test_css_fix.css: { weight: 100 }
