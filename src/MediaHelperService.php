@@ -19,6 +19,13 @@ class MediaHelperService {
   protected $entityTypeManager;
 
   /**
+   * The media storage instance.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $mediaStorage;
+
+  /**
    * MediaHelperService constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -26,6 +33,7 @@ class MediaHelperService {
    */
   public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
+    $this->mediaStorage = $this->entityTypeManager->getStorage('media');
   }
 
   /**
@@ -65,8 +73,7 @@ class MediaHelperService {
    *   The children.
    */
   public function getFolderMediaChildren(FolderEntity $folder) {
-    $storage = $this->entityTypeManager->getStorage('media');
-    $entities = $storage->loadByProperties(['field_parent_folder' => $folder->id()]);
+    $entities = $this->mediaStorage->loadByProperties(['field_parent_folder' => $folder->id()]);
     uasort($entities, [$this, 'sortByName']);
     return $entities;
   }
@@ -78,14 +85,30 @@ class MediaHelperService {
    *   The media entities.
    */
   public function getRootMedia() {
-    $storage = $this->entityTypeManager->getStorage('media');
-
     $nids = \Drupal::entityQuery('media')
       ->notExists('field_parent_folder')
       ->sort('name', 'ASC')
       ->execute();
 
-    return $storage->loadMultiple($nids);
+    return $this->mediaStorage->loadMultiple($nids);
+  }
+
+  /**
+   * Gets media entities whose names contain a given string.
+   *
+   * @param string $search_text
+   *   The  text to search by.
+   *
+   * @return array
+   *   The resulting media entities.
+   */
+  public function getSearchMedia(string $search_text) {
+    $nids = \Drupal::entityQuery('media')
+      ->condition('name', '%' . $search_text . '%', 'like')
+      ->sort('name', 'ASC')
+      ->execute();
+
+    return $this->mediaStorage->loadMultiple($nids);
   }
 
   /**

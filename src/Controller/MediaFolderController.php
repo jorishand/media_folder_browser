@@ -161,6 +161,31 @@ class MediaFolderController extends ControllerBase {
   }
 
   /**
+   * Callback to replace overview results with search results.
+   *
+   * @param string|null $search_text
+   *   Text to match.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   Ajax response.
+   */
+  public function getSearchResults($search_text) {
+    $response = new AjaxResponse();
+
+    $media = $this->mediaHelper->getSearchMedia($search_text);
+    $results = $this->renderOverview([], $media);
+
+    $results = $this->renderer->render($results);
+
+    $response->addCommand(new ReplaceCommand('.js-results-wrapper', $results));
+    $response->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
+    $response->addCommand(new InvokeCommand('.js-select-actions', 'addClass', ['hidden-scale-y']));
+    $response->addCommand(new InvokeCommand('.js-standard-actions', 'removeClass', ['hidden-scale-y']));
+
+    return $response;
+  }
+
+  /**
    * Callback to refresh the sidebar folder tree.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
@@ -187,7 +212,6 @@ class MediaFolderController extends ControllerBase {
    *   A render array.
    */
   public function getFolderContents(int $folder_id = NULL) {
-    $results = [];
     $folder_entity = NULL;
 
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
@@ -202,6 +226,23 @@ class MediaFolderController extends ControllerBase {
       $folders = $this->folderStructure->getRootFolders();
       $media = $this->mediaHelper->getRootMedia();
     }
+
+    return $this->renderOverview($folders, $media);
+  }
+
+  /**
+   * Turns folders and media entities into a render array for the overview.
+   *
+   * @param array $folders
+   *   Array of folder entities.
+   * @param array $media
+   *   Array of media entities.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function renderOverview(array $folders = [], array $media = []) {
+    $results = [];
 
     // Add child folders to results.
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
