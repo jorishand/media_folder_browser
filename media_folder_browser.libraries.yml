@@ -23,6 +23,7 @@ browser:
     theme:
       css/mfb.browser.css: {}
       css/mfb.sidebar.css: {}
+      css/mfb.search.css: {}
       assets/loader.css: {}
   js:
     js/mfb_sidebar.js: {}
