@@ -1,0 +1,67 @@
+//
+// @file
+// MFB Search CSS.
+//
+
+@import "variables";
+
+.search_field {
+  position: relative;
+  width: 30%;
+  height: 34px;
+  margin: 0 2%;
+
+  &__button {
+    display: flex;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    transition: all 0.3s ease-in-out;
+    border: none;
+    border-radius: 50%;
+    outline-style: none;
+    font-size: 12px;
+    cursor: pointer;
+
+    &::before {
+      display: block;
+      width: 16px;
+      height: 16px;
+      transition: all 0.3s ease-in-out;
+      background-image: url(../assets/search-dark.svg);
+      content: "";
+    }
+  }
+}
+
+.search_field__text {
+  position: absolute;
+  right: 0;
+  width: 40%;
+  height: 26px;
+  padding: 4px 20px;
+  transition: all 0.3s ease-in-out;
+  border: none;
+  border-radius: 25px;
+  outline-style: none;
+  font-size: 12px;
+
+  &:focus {
+    width: 100%;
+
+    ~ .search_field__button {
+      background: $yellow;
+      color: #fff;
+
+      &::before {
+        display: block;
+        background-image: url(../assets/search-white.svg);
+        content: "";
+      }
+    }
+  }
+}

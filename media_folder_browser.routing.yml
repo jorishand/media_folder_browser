@@ -26,6 +26,18 @@ mfb.sidebar.refresh:
   requirements:
     _permission: 'administer media folder browser'
 
+mfb.search:
+  path: '/media-folder-browser/search/{search_text}'
+  defaults:
+    _controller: '\Drupal\media_folder_browser\Controller\MediaFolderController::getSearchResults'
+    search_text: ''
+  requirements:
+    _permission: 'administer media folder browser'
+  options:
+    parameters:
+      search_text:
+        type: string
+
 # Folder entity related routes
 
 mfb.folder.add:

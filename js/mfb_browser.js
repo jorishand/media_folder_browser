@@ -107,4 +107,25 @@
       });
     }
   };
+  /**
+   * Handles searching.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for adding new folders.
+   */
+
+  Drupal.behaviors.searchSubmit = {
+    attach: function attach(context) {
+      $('.js-search-button', context).click(function (e) {
+        e.preventDefault();
+        var searchText = $('.js-search-text').val();
+        var endpoint = Drupal.url("media-folder-browser/search/".concat(searchText));
+        Drupal.ajax({
+          url: endpoint
+        }).execute();
+      });
+    }
+  };
 })(jQuery, Drupal);
