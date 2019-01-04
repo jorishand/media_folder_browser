@@ -146,7 +146,10 @@
         if (typeof id === 'undefined' || id === null || id === 'root') {
           id = '';
         }
-        const page = $(e.currentTarget).attr('data-page');
+        let page = $(e.currentTarget).attr('data-page');
+        if (typeof page === 'undefined') {
+          page = null;
+        }
         Drupal.mfbCommon.reload(id, false, page);
       });
     },

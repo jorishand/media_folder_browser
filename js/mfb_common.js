@@ -24,6 +24,10 @@
 
       if (typeof id === 'undefined' || id === null) {
         id = '';
+      }
+
+      if (typeof page === 'undefined' || page === null) {
+        page = '';
       } // Refresh overview
 
 

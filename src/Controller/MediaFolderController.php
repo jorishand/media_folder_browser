@@ -268,6 +268,10 @@ class MediaFolderController extends ControllerBase {
   public function renderOverview(array $folders = [], array $media = [], $page = 1) {
     $results = [];
 
+    if (!$page) {
+      $page = 1;
+    }
+
     // Add child folders to results.
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
     foreach ($folders as $folder) {

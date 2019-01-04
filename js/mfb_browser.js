@@ -148,6 +148,11 @@
         }
 
         var page = $(e.currentTarget).attr('data-page');
+
+        if (typeof page === 'undefined') {
+          page = null;
+        }
+
         Drupal.mfbCommon.reload(id, false, page);
       });
     }

@@ -22,6 +22,9 @@
       if (typeof id === 'undefined' || id === null) {
         id = '';
       }
+      if (typeof page === 'undefined' || page === null) {
+        page = '';
+      }
 
       // Refresh overview
       let endpoint = Drupal.url(`media-folder-browser/overview/refresh${id ? '/' : ''}${id}${page ? '?page=' : ''}${page}`);
