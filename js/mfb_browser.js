@@ -128,4 +128,28 @@
       });
     }
   };
+  /**
+   * Handles pagination.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for adding new folders.
+   */
+
+  Drupal.behaviors.pagination = {
+    attach: function attach(context) {
+      $('.js-mfb-pager-item', context).click(function (e) {
+        e.preventDefault();
+        var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+
+        if (typeof id === 'undefined' || id === null || id === 'root') {
+          id = '';
+        }
+
+        var page = $(e.currentTarget).attr('data-page');
+        Drupal.mfbCommon.reload(id, false, page);
+      });
+    }
+  };
 })(jQuery, Drupal);

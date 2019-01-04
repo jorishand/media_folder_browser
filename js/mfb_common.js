@@ -14,17 +14,20 @@
      *   overview.
      * @param {boolean} sidebar
      *   Wether or not the sidebar should be refreshed.
+     * @param {number|null} page
+     *   The current page.
      */
     reload: function reload(id) {
       var sidebar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var page = arguments.length > 2 ? arguments[2] : undefined;
+      $('.js-loader').removeClass('hidden'); // If the id is not defined, replace it with an  empty string.
 
-      // If the id is not defined, replace it with an  empty string.
       if (typeof id === 'undefined' || id === null) {
         id = '';
       } // Refresh overview
 
 
-      var endpoint = Drupal.url("media-folder-browser/overview/refresh/".concat(id));
+      var endpoint = Drupal.url("media-folder-browser/overview/refresh".concat(id ? '/' : '').concat(id).concat(page ? '?page=' : '').concat(page));
       Drupal.ajax({
         url: endpoint
       }).execute();

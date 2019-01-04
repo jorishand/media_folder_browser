@@ -13,15 +13,18 @@
      *   overview.
      * @param {boolean} sidebar
      *   Wether or not the sidebar should be refreshed.
+     * @param {number|null} page
+     *   The current page.
      */
-    reload: (id, sidebar = false) => {
+    reload: (id, sidebar = false, page) => {
+      $('.js-loader').removeClass('hidden');
       // If the id is not defined, replace it with an  empty string.
       if (typeof id === 'undefined' || id === null) {
         id = '';
       }
 
       // Refresh overview
-      let endpoint = Drupal.url(`media-folder-browser/overview/refresh/${id}`);
+      let endpoint = Drupal.url(`media-folder-browser/overview/refresh${id ? '/' : ''}${id}${page ? '?page=' : ''}${page}`);
       Drupal.ajax({ url: endpoint }).execute();
 
       if (sidebar) {
