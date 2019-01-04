@@ -431,3 +431,35 @@
   height: 0;
   overflow: hidden;
 }
+
+.mfb-pagination {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  width: 100%;
+  height: 100px;
+}
+
+.mfb-pagination_list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mfb-pagination_list-item {
+  display: inline;
+  margin-left: 20px;
+}
+
+.mfb-pagination_list-item:first-child {
+  margin-left: 0;
+}

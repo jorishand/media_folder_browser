@@ -2,49 +2,49 @@
   {# the number of pages that are displayed around the active page #}
   {% set nearbyPagesLimit = 2 %}
 
-  <div class="pagination pagination-centered">
-    <ul>
+  <div class="mfb-pagination">
+    <ul class="mfb-pagination_list">
       {% if current_page > 1 %}
         {# Previous page #}
-        <li><a class="js-mfb-pager-item" href="#" data-page="{{ current_page - 1 }}"><</a></li>
+        <li class="mfb-pagination_list-item"><a class="js-mfb-pager-item" href="#" data-page="{{ current_page - 1 }}"><</a></li>
 
         {# First page #}
         {% if ( 1 < current_page - nearbyPagesLimit ) %}
-          <li><a class="js-mfb-pager-item" href="#" data-page="{{ 1 }}">{{ 1 }}</a></li>
+          <li class="mfb-pagination_list-item"><a class="js-mfb-pager-item" href="#" data-page="{{ 1 }}">{{ 1 }}</a></li>
         {% endif %}
 
         {# Seperator #}
         {% if 2 < current_page - nearbyPagesLimit %}
-          <li>...</li>
+          <li class="mfb-pagination_list-item">...</li>
         {% endif %}
 
         {# Pages directly preceding the current page #}
         {% for i in range(current_page-nearbyPagesLimit, current_page - 1) if ( i > 0 ) %}
-          <li><a class="js-mfb-pager-item" href="#" data-page="{{ i }}">{{ i }}</a></li>
+          <li class="mfb-pagination_list-item"><a class="js-mfb-pager-item" href="#" data-page="{{ i }}">{{ i }}</a></li>
         {% endfor %}
       {% endif %}
 
       {# The current page #}
-      <li class="active">{{ current_page }}</li>
+      <li class="mfb-pagination_list-item active">{{ current_page }}</li>
 
       {# Pages directly following the current page #}
       {% if current_page < pages %}
         {% for i in range(current_page + 1, current_page + nearbyPagesLimit) if ( i <= pages ) %}
-          <li><a class="js-mfb-pager-item" href="#" data-page="{{ i }}">{{ i }}</a></li>
+          <li class="mfb-pagination_list-item"><a class="js-mfb-pager-item" href="#" data-page="{{ i }}">{{ i }}</a></li>
         {% endfor %}
 
         {# Seperator #}
         {% if  (pages - 1) > (current_page + nearbyPagesLimit) %}
-          <li>...</li>
+          <li class="mfb-pagination_list-item">...</li>
         {% endif %}
 
         {# Last page #}
         {% if ( pages > current_page + nearbyPagesLimit ) %}
-          <li><a class="js-mfb-pager-item" href="#" data-page="{{ pages }}">{{ pages }}</a></li>
+          <li class="mfb-pagination_list-item"><a class="js-mfb-pager-item" href="#" data-page="{{ pages }}">{{ pages }}</a></li>
         {% endif %}
 
         {# Next page #}
-        <li><a class="js-mfb-pager-item" href="#" data-page="{{ current_page + 1 }}">></a></li>
+        <li class="mfb-pagination_list-item"><a class="js-mfb-pager-item" href="#" data-page="{{ current_page + 1 }}">></a></li>
       {% endif %}
     </ul>
   </div>
