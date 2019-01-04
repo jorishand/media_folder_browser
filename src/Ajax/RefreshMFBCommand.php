@@ -17,7 +17,7 @@ class RefreshMFBCommand implements CommandInterface {
   protected $folderId;
 
   /**
-   * Boolean stating wether or not to refresh the sidebar folder structure.
+   * Boolean stating whether or not to refresh the sidebar folder structure.
    *
    * @var bool
    */

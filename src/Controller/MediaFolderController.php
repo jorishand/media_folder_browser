@@ -18,6 +18,7 @@ use Drupal\Core\File\FileSystem;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\media_folder_browser\Form\MediaFolderUploadForm;
 use Drupal\Core\Form\FormBuilderInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Provides route responses for media folders.
@@ -81,6 +82,11 @@ class MediaFolderController extends ControllerBase {
   protected $mediaStorage;
 
   /**
+   * @var Symfony\Component\HttpFoundation\RequestStack
+   */
+  private $requestStack;
+
+  /**
    * Constructs a new MediaFolderController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -96,7 +102,7 @@ class MediaFolderController extends ControllerBase {
    * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
    *   The renderer.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer, FormBuilderInterface $formBuilder) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer, FormBuilderInterface $formBuilder, RequestStack $request) {
     $this->entityTypeManager = $entity_type_manager;
     $this->fileSystem = $file_system;
     $this->folderStructure = $folder_structure_service;
@@ -105,6 +111,7 @@ class MediaFolderController extends ControllerBase {
     $this->formBuilder = $formBuilder;
     $this->folderStorage = $this->entityTypeManager->getStorage('folder_entity');
     $this->mediaStorage = $this->entityTypeManager->getStorage('media');
+    $this->requestStack = $request;
   }
 
   /**
@@ -117,7 +124,8 @@ class MediaFolderController extends ControllerBase {
       $container->get('media_folder_browser.folder_structure'),
       $container->get('media_folder_browser.media_helper'),
       $container->get('renderer'),
-      $container->get('form_builder')
+      $container->get('form_builder'),
+      $container->get('request_stack')
     );
   }
 
@@ -128,10 +136,13 @@ class MediaFolderController extends ControllerBase {
    *   A render array.
    */
   public function renderBrowser() {
+    $children = $this->getFolderContents();
+    $results = $this->renderOverview($children['folders'], $children['media']);
+
     $element = [
       '#theme' => 'folder_browser_overview',
       '#sidebar_folders' => $this->getFolderTree(),
-      '#results' => $this->getFolderContents(),
+      '#results' => $results,
       '#attached' => ['library' => ['media_folder_browser/browser']],
     ];
     return $element;
@@ -142,6 +153,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @param int|null $folder_id
    *   ID of the folder or null for root.
+   * @param int $page
+   *   Curent page of results.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   Ajax response.
@@ -149,7 +162,11 @@ class MediaFolderController extends ControllerBase {
   public function refreshResults($folder_id = NULL) {
     $response = new AjaxResponse();
 
-    $results = $this->getFolderContents($folder_id);
+    $children = $this->getFolderContents($folder_id);
+
+    $page = $this->requestStack->getCurrentRequest()->query->get('page');
+
+    $results = $this->renderOverview($children['folders'], $children['media'], $page);
     $results = $this->renderer->render($results);
 
     $response->addCommand(new ReplaceCommand('.js-results-wrapper', $results));
@@ -211,7 +228,7 @@ class MediaFolderController extends ControllerBase {
    *   ID of the folder or null for root.
    *
    * @return array
-   *   A render array.
+   *   Array containing child folders and media.
    */
   public function getFolderContents(int $folder_id = NULL) {
     $folder_entity = NULL;
@@ -229,7 +246,10 @@ class MediaFolderController extends ControllerBase {
       $media = $this->mediaHelper->getRootMedia();
     }
 
-    return $this->renderOverview($folders, $media);
+    return [
+      'folders' => $folders,
+      'media' => $media,
+    ];
   }
 
   /**
@@ -239,12 +259,18 @@ class MediaFolderController extends ControllerBase {
    *   Array of folder entities.
    * @param array $media
    *   Array of media entities.
+   * @param int $page
+   *   The current page.
    *
    * @return array
    *   A render array.
    */
-  public function renderOverview(array $folders = [], array $media = []) {
+  public function renderOverview(array $folders = [], array $media = [], $page = 1) {
     $results = [];
+
+    if (!$page) {
+      $page = 1;
+    }
 
     // Add child folders to results.
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
@@ -298,10 +324,23 @@ class MediaFolderController extends ControllerBase {
       ];
     }
 
-    return [
+    // Add pagination.
+    $per_page = 10;
+
+    pager_default_initialize(count($results), $per_page);
+
+    $chunks = array_chunk($results, $per_page, TRUE);
+    $render = [
       '#theme' => 'folder_browser_folder_results',
-      '#results' => $results,
+      '#results' => $chunks[$page - 1],
+      '#pager' => [
+        '#theme' => 'folder_browser_pager',
+        '#pages' => count($chunks),
+        '#current_page' => $page,
+      ],
     ];
+
+    return $render;
   }
 
   /**

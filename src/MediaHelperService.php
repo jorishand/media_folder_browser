@@ -56,7 +56,7 @@ class MediaHelperService {
     if (array_key_exists($media->bundle(), $file_fields)) {
       if ($media_ref = $media->get('field_media_' . $file_fields[$media->bundle()])->first()) {
         if ($file_ref = $media_ref->get('entity')->getTarget()) {
-          return $file_ref->getEntity();
+          return $file_ref->getValue();
         }
       }
     }
