@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_media_unlimited
+    - media.type.test_image
+    - node.type.test_page
+id: node.test_page.field_media_unlimited
+field_name: field_media_unlimited
+entity_type: node
+bundle: test_page
+label: 'Media unlimited'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      test_image: test_image
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

@@ -1,5 +1,21 @@
+common:
+  dependencies:
+      - core/jquery
+      - core/jquery.once
+      - core/drupal
+  js:
+    js/mfb_common.js: {}
+
+refresh-command:
+  js:
+    js/mfb_refresh_command.js: {}
+  dependencies:
+    - core/drupal.ajax
+
 browser:
   dependencies:
+      - media_folder_browser/common
+      - media_folder_browser/refresh-command
       - core/jquery
       - core/jquery.once
       - core/drupal
@@ -7,6 +23,9 @@ browser:
     theme:
       css/mfb.browser.css: {}
       css/mfb.sidebar.css: {}
+      css/mfb.search.css: {}
       assets/loader.css: {}
   js:
-    js/media_folder_sidebar.js: {}
+    js/mfb_sidebar.js: {}
+    js/mfb_browser.js: {}
+    js/mfb_context_menu.js: {}

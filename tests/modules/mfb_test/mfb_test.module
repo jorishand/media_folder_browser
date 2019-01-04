@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Module providing css and config for the tests.
+ */
+
+/**
+ * Implements hook_page_attachments().
+ */
+function mfb_test_page_attachments(array &$attachments) {
+  // Remove all css-effects that can lead to incorrect processing during
+  // testing.
+  $attachments['#attached']['library'][] = 'mfb_test/testing.test_css_fix';
+}

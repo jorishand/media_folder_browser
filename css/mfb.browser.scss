@@ -7,6 +7,7 @@
 
 .media-folder-browser {
   display: flex;
+  position: relative;
   height: 100%;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -19,17 +20,10 @@
 .overview-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 50px;
   background-color: $sidebar-back-color;
-
-  &.search {
-    border-top-right-radius: 15px;
-  }
-
-  &.actions {
-    border-bottom-right-radius: 15px;
-  }
 
   .search__current-folder {
     margin-left: 10px;
@@ -71,11 +65,12 @@
 
 .results-wrapper {
   height: calc(100% - 100px);
+  overflow: scroll;
 }
 
 .overview-container {
   display: grid;
-  padding: 15px 0 15px 15px;
+  padding: 15px;
   background-color: $white;
   grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
   grid-auto-rows: 1fr;
@@ -123,13 +118,29 @@
     }
 
     &__label {
+      width: 100%;
       margin-top: 5px;
       color: $sidebar-dark-grey;
       font-weight: $weight-semi-bold;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     &:hover {
-      box-shadow: 0 4px 8px 0 $shadow-light;
+      opacity: 0.7;
+    }
+
+    &.editable {
+      .overview-item__folder__label {
+        text-overflow: clip;
+        cursor: text;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 
@@ -138,6 +149,8 @@
     border-radius: 15px;
     box-shadow: 0 4px 8px 0 $shadow-light;
 
+    &.focused,
+    &.editable,
     &:hover,
     &:active {
       box-shadow: 0 4px 8px 0 $shadow-dark;
@@ -160,6 +173,7 @@
       padding-top: 5px;
       transition: height 0.2s ease-in-out;
       background-color: $white;
+      will-change: height;
     }
 
     &__selection {
@@ -211,6 +225,15 @@
       background-size: 16px;
     }
 
+    &.editable .overview-item__media__info {
+      z-index: 2;
+
+      .info_details__name {
+        text-overflow: clip;
+        cursor: text;
+      }
+    }
+
     .info_details {
       width: 70%;
       float: right;
@@ -219,8 +242,12 @@
 
       &__name {
         display: block;
+        width: 95%;
         margin-top: 2px;
         font-weight: $weight-semi-bold;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
       }
 
       &__size,
@@ -233,6 +260,50 @@
   }
 }
 
+.folder-browser-widget-modal .ui-front.ui-widget-content.ui-dialog-content {
+  padding: 0;
+}
+
+// Context Menu
+.folder-context-menu {
+  position: fixed;
+  width: 120px;
+  background-color: $white;
+  box-shadow: 0 4px 5px 3px $shadow-dark;
+  z-index: 3;
+}
+
+.context-options {
+  margin: 0;
+  padding: 10px 0;
+  list-style: none;
+
+  .option {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: $weight-semi-bold;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background: $shadow-light;
+
+      .sub-options {
+        display: block;
+      }
+    }
+  }
+}
+
+.sub-options {
+  display: none;
+  position: absolute;
+  top: 23px;
+  left: 110px;
+  background-color: $white;
+  box-shadow: 0 4px 5px 3px $shadow-dark;
+}
+
 // Loader:
 .loader-container {
   display: flex;
@@ -242,7 +313,7 @@
   width: 100%;
   height: calc(100% - 100px);
   background-color: $loader-background;
-  z-index: 1;
+  z-index: 2;
 }
 
 .hidden {
@@ -265,5 +336,49 @@
   &:focus {
     background-color: $sidebar-dark-grey;
     color: $white;
+  }
+}
+
+// Upload form wrapper
+.upload-wrapper {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  padding-left: 15px;
+  transition: height 0.5s ease-in-out;
+  background-color: $white;
+  z-index: 3;
+  will-change: height;
+
+  &.hidden {
+    display: block;
+    height: 0;
+    overflow: hidden;
+  }
+}
+
+// Pagination
+.mfb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100px;
+
+  &_list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &_list-item {
+    display: inline;
+    margin-left: 20px;
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 }

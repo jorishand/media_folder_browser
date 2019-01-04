@@ -1,0 +1,14 @@
+name: 'Media folder browser test'
+type: module
+description: 'Test module for Media folder browser.'
+package: Testing
+core: 8.x
+dependencies:
+  - drupal:image
+  - drupal:file
+  - drupal:media_library
+  - media_folder_browser
+  - drupal:media_test_source
+  - drupal:menu_ui
+  - drupal:node
+  - drupal:path

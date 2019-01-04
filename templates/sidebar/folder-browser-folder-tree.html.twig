@@ -1,3 +1,13 @@
-<ul class="mfb-sidebar__list">
-  {{ children }}
+<ul class="mfb-sidebar__list js-sidebar">
+  <li class="mfb-sidebar__list-item">
+    <div class="mfb-sidebar__list-item__folder">
+      <a href="#" class="menu-link root js-tree-item selected" data-id="root">
+        <i class="folder-icon"></i>
+        <span class="menu-link__title">{{ 'Root'|t }}</span>
+      </a>
+    </div>
+    <ul class="mfb-sidebar__list-item__list">
+      {{ children }}
+    </ul>
+  </li>
 </ul>

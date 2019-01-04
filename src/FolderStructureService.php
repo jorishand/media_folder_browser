@@ -38,6 +38,7 @@ class FolderStructureService {
 
     $nids = \Drupal::entityQuery('folder_entity')
       ->notExists('parent')
+      ->sort('name', 'ASC')
       ->execute();
 
     return $storage->loadMultiple($nids);
@@ -54,21 +55,67 @@ class FolderStructureService {
    */
   public function getFolderChildren(FolderEntity $folder) {
     $storage = $this->entityTypeManager->getStorage('folder_entity');
-    return $storage->loadByProperties(['parent' => $folder->id()]);
+    $entities = $storage->loadByProperties(['parent' => $folder->id()]);
+    uasort($entities, [$this, 'sortByName']);
+    return $entities;
   }
 
   /**
-   * Gets child media entities for a given folder.
+   * Compare function to sort folder entities by name.
    *
-   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folder
-   *   The folder entity.
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $a
+   *   Folder entity a.
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $b
+   *   Folder entity b.
    *
    * @return array
    *   The children.
    */
-  public function getFolderMediaChildren(FolderEntity $folder) {
-    $storage = $this->entityTypeManager->getStorage('media');
-    return $storage->loadByProperties(['field_parent_folder' => $folder->id()]);
+  private function sortByName(FolderEntity $a, FolderEntity $b) {
+    return strcmp($a->get('name')->value, $b->get('name')->value);
+  }
+
+  /**
+   * Delete a folder tree from the file system.
+   *
+   * @param string $dir
+   *   Uri of the directory.
+   *
+   * @return array
+   *   The children.
+   */
+  public function delTree($dir) {
+    $children = array_diff(scandir($dir), ['.', '..']);
+    foreach ($children as $child) {
+      (is_dir("$dir/$child")) ? $this->delTree("$dir/$child") : unlink("$dir/$child");
+    }
+    return rmdir($dir);
+  }
+
+  /**
+   * Recursively creates an URI based on the parent folder's name.
+   *
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $folderEntity
+   *   Folder entity.
+   * @param string $uri
+   *   URI to start from (used for recursion).
+   *
+   * @return string
+   *   The URI.
+   */
+  public function buildUri(FolderEntity $folderEntity, string $uri = '') {
+    $uri = empty($uri) ? '' : '/' . $uri;
+    $uri = $folderEntity->getName() . $uri;
+
+    if ($folderEntity->hasParent()) {
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent */
+      $parent = $this->entityTypeManager
+        ->getStorage('folder_entity')
+        ->load($folderEntity->get('parent')->target_id);
+      return $this->buildUri($parent, $uri);
+    }
+
+    return 'public://' . $uri;
   }
 
 }

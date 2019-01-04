@@ -19,17 +19,20 @@
 }
 
 .mfb-sidebar {
+  position: relative;
   flex: 2;
-  border-right: 3px solid $sidebar-dark-grey;
-  border-radius: 15px 0 0 15px;
+  padding: 15px 0;
+  border-right: 2px solid $sidebar-dark-grey;
   background-color: $sidebar-back-color;
   font-size: 14px;
 
   &__list {
     position: relative;
+    height: 100%;
     margin: 0;
-    padding: 15px 0 10px 25px;
+    padding-left: 25px;
     list-style: none;
+    overflow: scroll;
 
     > .mfb-sidebar__list-item::after {
       display: none;
@@ -144,6 +147,11 @@
     color: $white;
     text-decoration: none;
     opacity: 0.7;
+
+    &.root {
+      margin-left: 0;
+      padding: 0;
+    }
 
     &__title {
       margin-left: 8px;

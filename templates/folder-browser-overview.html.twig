@@ -1,12 +1,16 @@
-<div class="media-folder-browser">
+<div class="media-folder-browser js-media-folder-browser">
   <div class="mfb-sidebar">
       {{ sidebar_folders }}
   </div>
   <div class="mfb-overview">
     <div class="overview-bar search">
       <div class="search__current-folder js-current-folder">Root</div>
+      <div class="search_field">
+        <input type="text" name="search" class="search_field__text js-search-text" placeholder="{{ "search"|t }}">
+        <span class="search_field__button js-search-button"></span>
+      </div>
     </div>
-    <div class="loader-container hidden">
+    <div class="loader-container js-loader hidden">
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
     {{ results }}
@@ -21,4 +25,5 @@
       </div>
     </div>
   </div>
+  <div class="upload-wrapper js-upload-wrapper hidden"></div>
 </div>

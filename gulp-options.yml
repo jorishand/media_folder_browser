@@ -1,16 +1,12 @@
 # This file holds various gulp configurations that we need in our Gulp process.
 
 # Locations of our SASS and CSS files.
-scssSrc: "./"
-cssDest: "./"
+scssSrc: "./css/"
+cssDest: "./css/"
 
-# This are the paths that will be added to sass search paths for include.
-# @todo - note that we are not using this for now really, this pattern will
-# maybe make sense for more complex CSS work that we will do. If this is not
-# reused in near future lets consider to remove it.
-sassIncludePaths:
-  - "./sass/"
-  - "./node_modules/"
+# Locations of our ES6 and JS files.
+es6Src: "./js/"
+jsDest: "./js/"
 
 # Automatically load any gulp plugins in package.json.
 gulpLoadPlugins:
@@ -21,6 +17,7 @@ gulpLoadPlugins:
     - "postcss-*"
     - "stylelint"
     - "syntax_scss"
+    - "babel-*"
   # Rename mapping to values that we will use in JS code.
   rename:
     postcss-reporter: "reporter"

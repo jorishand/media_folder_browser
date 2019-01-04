@@ -24,6 +24,13 @@ folder_browser_folder_results:
   template: 'folder-browser-folder-results'
   variables:
     results: []
+    pager: []
+
+folder_browser_pager:
+  template: 'folder-browser-pager'
+  variables:
+    pages: 1
+    current_page: NULL
 
 folder_browser_folder_tree:
   template: 'sidebar/folder-browser-folder-tree'
