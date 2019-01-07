@@ -106,18 +106,7 @@
     }
 
     moveAction(folderId) {
-      if (this.type === 'media') {
-        $('.js-loader').removeClass('hidden');
-        const mediaId = this.target.attr('data-id');
-        const endpoint = Drupal.url(`media-folder-browser/media/move/${mediaId}/${folderId}`);
-        Drupal.ajax({ url: endpoint }).execute();
-      }
-      else {
-        $('.js-loader').removeClass('hidden');
-        const selectedFolderId = this.target.attr('data-id');
-        const endpoint = Drupal.url(`media-folder-browser/folder/move/${selectedFolderId}/${folderId}`);
-        Drupal.ajax({ url: endpoint }).execute();
-      }
+      Drupal.mfbCommon.move(this.target.attr('data-id'), folderId, this.type);
     }
 
     moveParentAction() {

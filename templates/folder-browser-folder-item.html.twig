@@ -1,4 +1,4 @@
-<a href="#" data-id="{{ id }}" class="overview-item overview-item__folder js-folder-item">
-  <img src="{{ folder_icon }}" class="overview-item__folder__image" alt="folder">
+<a href="#" data-id="{{ id }}" class="overview-item overview-item__folder js-folder-item" draggable="true" ondrop="Drupal.mfbDragDrop.onDropHandler(event, this)" ondragover="Drupal.mfbDragDrop.onDragOverHandler(event)" ondragstart="Drupal.mfbDragDrop.onDragStartHandler(event, 'folder')">
+  <img src="{{ folder_icon }}" class="overview-item__folder__image" alt="folder" draggable="false">
   <span class="overview-item__folder__label js-item-label" data-id="{{ id }}">{{ name|trim }}</span>
 </a>

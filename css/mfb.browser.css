@@ -116,6 +116,7 @@
   border-top: solid 1px #e1e7ed;
   border-bottom: solid 1px #e1e7ed;
   background-color: #f3f7fa;
+  color: #57677b;
 }
 
 .mfb-results-counter b {
@@ -191,6 +192,8 @@
 
 .overview-item {
   position: relative;
+  -webkit-transform: translate(0, 0);
+          transform: translate(0, 0);
   border: none;
   color: #000;
   text-decoration: none;

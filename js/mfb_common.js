@@ -44,6 +44,10 @@
         }).execute();
       }
     },
+
+    /**
+     * Adds a new folder to the active directory.
+     */
     addFolder: function addFolder() {
       $('.js-loader').removeClass('hidden');
       var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
@@ -57,6 +61,10 @@
         url: endpoint
       }).execute();
     },
+
+    /**
+     * Opens the media upload form for the current directory.
+     */
     addMedia: function addMedia() {
       $('.js-loader').removeClass('hidden');
       var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
@@ -66,6 +74,31 @@
       }
 
       var endpoint = Drupal.url("media-folder-browser/media/add/".concat(id));
+      Drupal.ajax({
+        url: endpoint
+      }).execute();
+    },
+
+    /**
+     * Moves a folder or media entity to a different folder.
+     *
+     * @param {number} sourceId
+     *   ID of the entity that should be moved.
+     * @param {number} destId
+     *   ID of the destination folder entity.
+     * @param {string} type
+     *   Wether the source entity is a "media" or "folder" entity.
+     */
+    move: function move(sourceId, destId, type) {
+      $('.js-loader').removeClass('hidden');
+      var endpoint = '';
+
+      if (type === 'media') {
+        endpoint = Drupal.url("media-folder-browser/media/move/".concat(sourceId, "/").concat(destId));
+      } else {
+        endpoint = Drupal.url("media-folder-browser/folder/move/".concat(sourceId, "/").concat(destId));
+      }
+
       Drupal.ajax({
         url: endpoint
       }).execute();

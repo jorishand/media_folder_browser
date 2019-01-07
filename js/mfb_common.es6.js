@@ -36,6 +36,9 @@
         Drupal.ajax({ url: endpoint }).execute();
       }
     },
+    /**
+     * Adds a new folder to the active directory.
+     */
     addFolder: () => {
       $('.js-loader').removeClass('hidden');
       let id = $('.js-current-folder').attr('data-folder-id');
@@ -46,6 +49,9 @@
       const endpoint = Drupal.url(`media-folder-browser/folder/add/${id}`);
       Drupal.ajax({ url: endpoint }).execute();
     },
+    /**
+     * Opens the media upload form for the current directory.
+     */
     addMedia: () => {
       $('.js-loader').removeClass('hidden');
       let id = $('.js-current-folder').attr('data-folder-id');
@@ -54,6 +60,27 @@
         id = '';
       }
       const endpoint = Drupal.url(`media-folder-browser/media/add/${id}`);
+      Drupal.ajax({ url: endpoint }).execute();
+    },
+    /**
+     * Moves a folder or media entity to a different folder.
+     *
+     * @param {number} sourceId
+     *   ID of the entity that should be moved.
+     * @param {number} destId
+     *   ID of the destination folder entity.
+     * @param {string} type
+     *   Wether the source entity is a "media" or "folder" entity.
+     */
+    move: (sourceId, destId, type) => {
+      $('.js-loader').removeClass('hidden');
+      let endpoint = '';
+      if (type === 'media') {
+        endpoint = Drupal.url(`media-folder-browser/media/move/${sourceId}/${destId}`);
+      }
+      else {
+        endpoint = Drupal.url(`media-folder-browser/folder/move/${sourceId}/${destId}`);
+      }
       Drupal.ajax({ url: endpoint }).execute();
     },
   };

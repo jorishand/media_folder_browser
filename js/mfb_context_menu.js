@@ -128,23 +128,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     }, {
       key: "moveAction",
       value: function moveAction(folderId) {
-        if (this.type === 'media') {
-          $('.js-loader').removeClass('hidden');
-          var mediaId = this.target.attr('data-id');
-          var endpoint = Drupal.url("media-folder-browser/media/move/".concat(mediaId, "/").concat(folderId));
-          Drupal.ajax({
-            url: endpoint
-          }).execute();
-        } else {
-          $('.js-loader').removeClass('hidden');
-          var selectedFolderId = this.target.attr('data-id');
-
-          var _endpoint = Drupal.url("media-folder-browser/folder/move/".concat(selectedFolderId, "/").concat(folderId));
-
-          Drupal.ajax({
-            url: _endpoint
-          }).execute();
-        }
+        Drupal.mfbCommon.move(this.target.attr('data-id'), folderId, this.type);
       }
     }, {
       key: "moveParentAction",
@@ -160,10 +144,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           $('.js-loader').removeClass('hidden');
           var selectedFolderId = this.target.attr('data-id');
 
-          var _endpoint2 = Drupal.url("media-folder-browser/folder/move-parent/".concat(selectedFolderId));
+          var _endpoint = Drupal.url("media-folder-browser/folder/move-parent/".concat(selectedFolderId));
 
           Drupal.ajax({
-            url: _endpoint2
+            url: _endpoint
           }).execute();
         }
       }

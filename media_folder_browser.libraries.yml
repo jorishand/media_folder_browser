@@ -29,3 +29,4 @@ browser:
     js/mfb_sidebar.js: {}
     js/mfb_browser.js: {}
     js/mfb_context_menu.js: {}
+    js/mfb_drag_drop.js: {}
