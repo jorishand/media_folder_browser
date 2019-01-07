@@ -24,6 +24,8 @@ folder_browser_folder_results:
   template: 'folder-browser-folder-results'
   variables:
     results: []
+    count: NULL
+    total: NULL
     pager: []
 
 folder_browser_pager:

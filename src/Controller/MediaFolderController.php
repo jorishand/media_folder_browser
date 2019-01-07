@@ -325,7 +325,8 @@ class MediaFolderController extends ControllerBase {
     }
 
     // Add pagination.
-    $per_page = 10;
+    // Todo: Make configurable.
+    $per_page = 18;
 
     pager_default_initialize(count($results), $per_page);
 
@@ -333,6 +334,8 @@ class MediaFolderController extends ControllerBase {
     $render = [
       '#theme' => 'folder_browser_folder_results',
       '#results' => $chunks[$page - 1],
+      '#count' => count($chunks[$page - 1]),
+      '#total' => count($results),
       '#pager' => [
         '#theme' => 'folder_browser_pager',
         '#pages' => count($chunks),

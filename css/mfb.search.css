@@ -50,7 +50,7 @@
   padding: 4px 20px;
   -webkit-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
-  border: none;
+  border: solid 1px #e5e5e5;
   border-radius: 25px;
   outline-style: none;
   font-size: 12px;
@@ -58,10 +58,11 @@
 
 .search_field__text:focus {
   width: 100%;
+  border-color: #57677b;
 }
 
 .search_field__text:focus ~ .search_field__button {
-  background: #efce4a;
+  background: #57677b;
   color: #fff;
 }
 
