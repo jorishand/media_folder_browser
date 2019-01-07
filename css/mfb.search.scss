@@ -45,16 +45,17 @@
   height: 26px;
   padding: 4px 20px;
   transition: all 0.3s ease-in-out;
-  border: none;
+  border: solid 1px $light-grey;
   border-radius: 25px;
   outline-style: none;
   font-size: 12px;
 
   &:focus {
     width: 100%;
+    border-color: $text-dark-blue;
 
     ~ .search_field__button {
-      background: $yellow;
+      background: $text-dark-blue;
       color: #fff;
 
       &::before {

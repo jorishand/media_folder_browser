@@ -1,6 +1,13 @@
 <div class="results-wrapper js-results-wrapper">
-  <div class="overview-container js-overview">
-    {{ results }}
+  <div class="mfb-results-counter">
+    {% trans %}
+      Showing <b>{{ count }}</b> of <b>{{ total }}</b> items.
+    {% endtrans %}
+  </div>
+  <div class="overview-wrapper">
+    <div class="overview-container js-overview">
+      {{ results }}
+    </div>
   </div>
   {{ pager }}
 </div>

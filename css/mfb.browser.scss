@@ -23,18 +23,20 @@
   justify-content: space-between;
   width: 100%;
   height: 50px;
-  background-color: $sidebar-back-color;
 
   .search__current-folder {
-    margin-left: 10px;
-    color: $white;
-    font-size: 16px;
+    margin-left: 15px;
+    color: $text-dark-blue;
+    font-size: 25px;
+    font-weight: $weight-semi-bold;
   }
 
   .actions__count {
+    display: flex;
+    align-items: center;
     margin-left: 10px;
-    color: $white;
-    font-size: 16px;
+    color: $black;
+    font-size: 15px;
   }
 
   .select-actions,
@@ -64,8 +66,54 @@
 }
 
 .results-wrapper {
+  position: relative;
   height: calc(100% - 100px);
   overflow: scroll;
+}
+
+.mfb-results-counter {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  height: 40px;
+  padding-left: 15px;
+  border-top: solid 1px $blue-grey-dark;
+  border-bottom: solid 1px $blue-grey-dark;
+  background-color: $blue-grey;
+
+  b {
+    padding: 5px;
+  }
+}
+
+.overview-wrapper {
+  height: calc(100% - 84px);
+  overflow: scroll;
+}
+
+.mfb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-top: solid 1px $blue-grey-dark;
+  border-bottom: solid 1px $blue-grey-dark;
+  background-color: $blue-grey;
+
+  &_list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &_list-item {
+    display: inline;
+    margin-left: 20px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
 }
 
 .overview-container {
@@ -120,7 +168,7 @@
     &__label {
       width: 100%;
       margin-top: 5px;
-      color: $sidebar-dark-grey;
+      color: $sidebar-back-color;
       font-weight: $weight-semi-bold;
       text-align: center;
       text-overflow: ellipsis;
@@ -237,7 +285,7 @@
     .info_details {
       width: 70%;
       float: right;
-      color: $sidebar-dark-grey;
+      color: $black;
       line-height: 16px;
 
       &__name {
@@ -323,18 +371,20 @@
 // Buttons
 .mfb-button {
   display: inline-block;
-  padding: 5px 15px;
+  padding: 5px 25px;
   transition: all 0.1s ease-in-out;
-  border-radius: 13px;
+  border: solid 1px $text-dark-blue;
+  border-radius: 15px;
   background-color: $white;
-  color: $sidebar-back-color;
+  color: $text-dark-blue;
+  font-size: 15px;
   line-height: normal;
   text-align: center;
   cursor: pointer;
 
   &:hover,
   &:focus {
-    background-color: $sidebar-dark-grey;
+    background-color: $text-dark-blue;
     color: $white;
   }
 }
@@ -356,29 +406,5 @@
     display: block;
     height: 0;
     overflow: hidden;
-  }
-}
-
-// Pagination
-.mfb-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100px;
-
-  &_list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  &_list-item {
-    display: inline;
-    margin-left: 20px;
-
-    &:first-child {
-      margin-left: 0;
-    }
   }
 }
