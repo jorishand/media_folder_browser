@@ -14,7 +14,13 @@
         <i class="dropdown-container__arrow"></i>
       </div>
     {% endif %}
-    <a href="#" class="menu-link js-tree-item" data-id="{{ id }}">
+    <a href="#"
+       class="menu-link js-tree-item"
+       data-id="{{ id }}"
+       draggable="true"
+       ondrop="Drupal.mfbDragDrop.onDropHandler(event, this)"
+       ondragover="Drupal.mfbDragDrop.onDragOverHandler(event)"
+       ondragstart="Drupal.mfbDragDrop.onDragStartHandler(event, 'folder')">
       <i class="folder-icon"></i>
       <span class="menu-link__title">{{ name }}</span>
     </a>
