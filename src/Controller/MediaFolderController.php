@@ -197,8 +197,7 @@ class MediaFolderController extends ControllerBase {
     $response->addCommand(new ReplaceCommand('.js-results-wrapper', $results));
     $response->addCommand(new InvokeCommand('.loader-container', 'addClass', ['hidden']));
     $response->addCommand(new InvokeCommand('.js-select-actions', 'addClass', ['hidden-scale-y']));
-    $response->addCommand(new InvokeCommand('.js-standard-actions', 'removeClass', ['hidden-scale-y']));
-    $response->addCommand(new HtmlCommand('.js-current-folder', t('Search results for "%search"', ['%search' => $search_text])));
+    $response->addCommand(new InvokeCommand('.js-standard-actions', 'addClass', ['hidden-scale-y']));
     $response->addCommand(new InvokeCommand('.selected', 'removeClass', ['selected']));
 
     return $response;

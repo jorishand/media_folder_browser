@@ -121,11 +121,35 @@
    */
   Drupal.behaviors.searchSubmit = {
     attach(context) {
-      $('.js-search-button', context).click((e) => {
-        e.preventDefault();
-        const searchText = $('.js-search-text').val();
-        const endpoint = Drupal.url(`media-folder-browser/search/${searchText}`);
+      const searchMedia = () => {
+        const $input = $('.js-search-text');
+        const query = $input.val();
+
+        $('.js-current-folder').html(Drupal.t('Search results for "%search"', {'%search': query}));
+        $input.blur();
+        $('.js-loader').removeClass('hidden');
+
+
+        const endpoint = Drupal.url(`media-folder-browser/search/${query}`);
         Drupal.ajax({ url: endpoint }).execute();
+      };
+
+      // Trigger search when pressing enter.
+      $(context)
+      .find('input.js-search-text')
+      .on('keypress', (e) => {
+        const enterCode = e.charCode || e.keyCode;
+        if (enterCode === 13) {
+          searchMedia();
+        }
+      });
+
+      // Trigger search when clicking the button.
+      $(context)
+      .find('div.js-search-button')
+      .on('click', (e) => {
+        e.preventDefault();
+        searchMedia();
       });
     },
   };
