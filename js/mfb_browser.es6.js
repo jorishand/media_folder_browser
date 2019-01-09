@@ -14,29 +14,31 @@
    */
   Drupal.behaviors.selectMedia = {
     attach(context) {
-      $('.js-media-item', context).click((e) => {
-        e.preventDefault();
-        const clickedElement = $(e.currentTarget);
+      $(context)
+        .find('.js-media-item')
+        .on('click', (e) => {
+          e.preventDefault();
+          const clickedElement = $(e.currentTarget);
 
-        if (clickedElement.hasClass('selected')) {
-          clickedElement.removeClass('selected');
-        }
-        else {
-          clickedElement.addClass('selected');
-        }
+          if (clickedElement.hasClass('selected')) {
+            clickedElement.removeClass('selected');
+          }
+          else {
+            clickedElement.addClass('selected');
+          }
 
-        // Update selected count.
-        const selectedCount = clickedElement.parent().children('.selected').length;
-        if (selectedCount > 0) {
-          $('.js-select-actions').removeClass('hidden-scale-y');
-          $('.js-standard-actions').addClass('hidden-scale-y');
-        }
-        else {
-          $('.js-select-actions').addClass('hidden-scale-y');
-          $('.js-standard-actions').removeClass('hidden-scale-y');
-        }
-        $('.js-selected-count').html(selectedCount);
-      });
+          // Update selected count.
+          const selectedCount = clickedElement.parent().children('.selected').length;
+          if (selectedCount > 0) {
+            $('.js-select-actions').removeClass('hidden-scale-y');
+            $('.js-standard-actions').addClass('hidden-scale-y');
+          }
+          else {
+            $('.js-select-actions').addClass('hidden-scale-y');
+            $('.js-standard-actions').removeClass('hidden-scale-y');
+          }
+          $('.js-selected-count').html(selectedCount);
+        });
     },
   };
 
@@ -50,30 +52,32 @@
    */
   Drupal.behaviors.submitSelection = {
     attach(context) {
-      $('.js-submit-selected', context).click((e) => {
-        e.preventDefault();
-        const clickedElement = $(e.currentTarget);
-        const widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
+      $(context)
+        .find('.js-submit-selected')
+        .on('click', (e) => {
+          e.preventDefault();
+          const clickedElement = $(e.currentTarget);
+          const widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
 
-        $('.js-loader').removeClass('hidden');
+          $('.js-loader').removeClass('hidden');
 
-        let selected = '';
+          let selected = '';
 
-        $('.js-overview').children('.selected').each((index, elem) => {
-          if (selected !== '') selected += ',';
-          selected += $(elem).attr('data-id');
+          $('.js-overview').children('.selected').each((index, elem) => {
+            if (selected !== '') selected += ',';
+            selected += $(elem).attr('data-id');
+          });
+
+          $(`[data-folder-browser-widget-value=${widgetId}]`).val(selected);
+          $(`[data-folder-browser-widget-update=${widgetId}]`).trigger('mousedown');
+
+          // Close dialog.
+          const $dialog = $('#drupal-modal');
+          if ($dialog.length) {
+            Drupal.dialog($dialog.get(0)).close();
+            $dialog.remove();
+          }
         });
-
-        $(`[data-folder-browser-widget-value=${widgetId}]`).val(selected);
-        $(`[data-folder-browser-widget-update=${widgetId}]`).trigger('mousedown');
-
-        // Close dialog.
-        const $dialog = $('#drupal-modal');
-        if ($dialog.length) {
-          Drupal.dialog($dialog.get(0)).close();
-          $dialog.remove();
-        }
-      });
     },
   };
 
@@ -87,10 +91,12 @@
    */
   Drupal.behaviors.addMedia = {
     attach(context) {
-      $('.js-submit-add-media', context).click((e) => {
-        e.preventDefault();
-        Drupal.mfbCommon.addMedia();
-      });
+      $(context)
+        .find('.js-submit-add-media')
+        .on('click', (e) => {
+          e.preventDefault();
+          Drupal.mfbCommon.addMedia();
+        });
     },
   };
 
@@ -104,10 +110,12 @@
    */
   Drupal.behaviors.addFolder = {
     attach(context) {
-      $('.js-submit-add-folder', context).click((e) => {
-        e.preventDefault();
-        Drupal.mfbCommon.addFolder();
-      });
+      $(context)
+        .find('.js-submit-add-folder')
+        .on('click', (e) => {
+          e.preventDefault();
+          Drupal.mfbCommon.addFolder();
+        });
     },
   };
 
@@ -125,10 +133,9 @@
         const $input = $('.js-search-text');
         const query = $input.val();
 
-        $('.js-current-folder').html(Drupal.t('Search results for "%search"', {'%search': query}));
+        $('.js-current-folder').html(Drupal.t('Search results for "%search"', { '%search': query }));
         $input.blur();
         $('.js-loader').removeClass('hidden');
-
 
         const endpoint = Drupal.url(`media-folder-browser/search/${query}`);
         Drupal.ajax({ url: endpoint }).execute();
@@ -136,21 +143,21 @@
 
       // Trigger search when pressing enter.
       $(context)
-      .find('input.js-search-text')
-      .on('keypress', (e) => {
-        const enterCode = e.charCode || e.keyCode;
-        if (enterCode === 13) {
-          searchMedia();
-        }
-      });
+        .find('input.js-search-text')
+        .on('keypress', (e) => {
+          const enterCode = e.charCode || e.keyCode;
+          if (enterCode === 13) {
+            searchMedia();
+          }
+        });
 
       // Trigger search when clicking the button.
       $(context)
-      .find('div.js-search-button')
-      .on('click', (e) => {
-        e.preventDefault();
-        searchMedia();
-      });
+        .find('div.js-search-button')
+        .on('click', (e) => {
+          e.preventDefault();
+          searchMedia();
+        });
     },
   };
 
@@ -164,18 +171,20 @@
    */
   Drupal.behaviors.pagination = {
     attach(context) {
-      $('.js-mfb-pager-item', context).click((e) => {
-        e.preventDefault();
-        let id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
-        if (typeof id === 'undefined' || id === null || id === 'root') {
-          id = '';
-        }
-        let page = $(e.currentTarget).attr('data-page');
-        if (typeof page === 'undefined') {
-          page = null;
-        }
-        Drupal.mfbCommon.reload(id, false, page);
-      });
+      $(context)
+        .find('.js-mfb-pager-item')
+        .on('click', (e) => {
+          e.preventDefault();
+          let id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+          if (typeof id === 'undefined' || id === null || id === 'root') {
+            id = '';
+          }
+          let page = $(e.currentTarget).attr('data-page');
+          if (typeof page === 'undefined') {
+            page = null;
+          }
+          Drupal.mfbCommon.reload(id, false, page);
+        });
     },
   };
 })(jQuery, Drupal);

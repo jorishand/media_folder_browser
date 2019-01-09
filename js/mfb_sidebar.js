@@ -15,7 +15,7 @@
    */
   Drupal.behaviors.treeFolderReload = {
     attach: function attach(context) {
-      $('.js-tree-item, .js-folder-item', context).click(function (e) {
+      $(context).find('.js-tree-item, .js-folder-item').on('click', function (e) {
         e.preventDefault();
         var clickedElement = $(e.currentTarget);
         var dataId = clickedElement.attr('data-id'); // Set 'selected' class on the clicked folder.
@@ -93,7 +93,7 @@
 
   Drupal.behaviors.sidebarCollapse = {
     attach: function attach(context) {
-      $('.js-dropdown', context).click(function (e) {
+      $(context).find('.js-dropdown').on('click', function (e) {
         e.preventDefault();
         setInitialHeights();
         var clickedElement = $(e.currentTarget);

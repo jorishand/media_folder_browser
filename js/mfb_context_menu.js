@@ -216,7 +216,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
   Drupal.behaviors.hideContextMenu = {
     attach: function attach() {
-      $('.js-media-folder-browser').click(function () {
+      $('.js-media-folder-browser').on('click', function () {
         $('.js-context-menu').remove();
         $('.focused').removeClass('focused');
       });
@@ -230,17 +230,17 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     attach: function attach() {
       var $label = $('.js-item-label'); // Prevent the parent click event (select) from being triggered.
 
-      $label.click(function (e) {
+      $label.on('click', function (e) {
         e.stopPropagation();
       }); // Trigger focusout when pressing enter.
 
-      $label.keydown(function (e) {
+      $label.on('keydown', function (e) {
         if (e.which === 13) {
           e.preventDefault();
           $(e.target).blur();
         }
       });
-      $label.focusout(function (e) {
+      $label.on('focusout', function (e) {
         var $activeSpan = $(e.target);
         var input = $activeSpan.html();
         var id = $activeSpan.attr('data-id');

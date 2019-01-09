@@ -15,7 +15,7 @@
    */
   Drupal.behaviors.selectMedia = {
     attach: function attach(context) {
-      $('.js-media-item', context).click(function (e) {
+      $(context).find('.js-media-item').on('click', function (e) {
         e.preventDefault();
         var clickedElement = $(e.currentTarget);
 
@@ -51,7 +51,7 @@
 
   Drupal.behaviors.submitSelection = {
     attach: function attach(context) {
-      $('.js-submit-selected', context).click(function (e) {
+      $(context).find('.js-submit-selected').on('click', function (e) {
         e.preventDefault();
         var clickedElement = $(e.currentTarget);
         var widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
@@ -84,7 +84,7 @@
 
   Drupal.behaviors.addMedia = {
     attach: function attach(context) {
-      $('.js-submit-add-media', context).click(function (e) {
+      $(context).find('.js-submit-add-media').on('click', function (e) {
         e.preventDefault();
         Drupal.mfbCommon.addMedia();
       });
@@ -101,7 +101,7 @@
 
   Drupal.behaviors.addFolder = {
     attach: function attach(context) {
-      $('.js-submit-add-folder', context).click(function (e) {
+      $(context).find('.js-submit-add-folder').on('click', function (e) {
         e.preventDefault();
         Drupal.mfbCommon.addFolder();
       });
@@ -119,7 +119,6 @@
   Drupal.behaviors.searchSubmit = {
     attach: function attach(context) {
       var searchMedia = function searchMedia() {
-        console.log('search');
         var $input = $('.js-search-text');
         var query = $input.val();
         $('.js-current-folder').html(Drupal.t('Search results for "%search"', {
@@ -142,7 +141,7 @@
         }
       }); // Trigger search when clicking the button.
 
-      $('.js-search-button', context).click(function (e) {
+      $(context).find('div.js-search-button').on('click', function (e) {
         e.preventDefault();
         searchMedia();
       });
@@ -159,7 +158,7 @@
 
   Drupal.behaviors.pagination = {
     attach: function attach(context) {
-      $('.js-mfb-pager-item', context).click(function (e) {
+      $(context).find('.js-mfb-pager-item').on('click', function (e) {
         e.preventDefault();
         var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
 

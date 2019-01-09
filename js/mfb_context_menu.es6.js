@@ -180,7 +180,7 @@
    */
   Drupal.behaviors.hideContextMenu = {
     attach() {
-      $('.js-media-folder-browser').click(() => {
+      $('.js-media-folder-browser').on('click', () => {
         $('.js-context-menu').remove();
         $('.focused').removeClass('focused');
       });
@@ -195,19 +195,19 @@
       const $label = $('.js-item-label');
 
       // Prevent the parent click event (select) from being triggered.
-      $label.click((e) => {
+      $label.on('click', (e) => {
         e.stopPropagation();
       });
 
       // Trigger focusout when pressing enter.
-      $label.keydown((e) => {
+      $label.on('keydown', (e) => {
         if (e.which === 13) {
           e.preventDefault();
           $(e.target).blur();
         }
       });
 
-      $label.focusout((e) => {
+      $label.on('focusout', (e) => {
         const $activeSpan = $(e.target);
         const input = $activeSpan.html();
         const id = $activeSpan.attr('data-id');

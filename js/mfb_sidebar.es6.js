@@ -14,24 +14,26 @@
    */
   Drupal.behaviors.treeFolderReload = {
     attach(context) {
-      $('.js-tree-item, .js-folder-item', context).click((e) => {
-        e.preventDefault();
-        const clickedElement = $(e.currentTarget);
-        let dataId = clickedElement.attr('data-id');
+      $(context)
+        .find('.js-tree-item, .js-folder-item')
+        .on('click', (e) => {
+          e.preventDefault();
+          const clickedElement = $(e.currentTarget);
+          let dataId = clickedElement.attr('data-id');
 
-        // Set 'selected' class on the clicked folder.
-        $('.selected').removeClass('selected');
-        $(`[data-id=${dataId}]`).addClass('selected');
-        // Set 'current folder' label and ID.
-        const $currentFolder = $('.js-current-folder');
-        $currentFolder.html(clickedElement.children('span').html());
-        $currentFolder.attr('data-folder-id', dataId);
-        // Refresh the overview.
-        if (dataId === 'root') {
-          dataId = null;
-        }
-        Drupal.mfbCommon.reload(dataId);
-      });
+          // Set 'selected' class on the clicked folder.
+          $('.selected').removeClass('selected');
+          $(`[data-id=${dataId}]`).addClass('selected');
+          // Set 'current folder' label and ID.
+          const $currentFolder = $('.js-current-folder');
+          $currentFolder.html(clickedElement.children('span').html());
+          $currentFolder.attr('data-folder-id', dataId);
+          // Refresh the overview.
+          if (dataId === 'root') {
+            dataId = null;
+          }
+          Drupal.mfbCommon.reload(dataId);
+        });
     },
   };
 
@@ -94,30 +96,32 @@
    */
   Drupal.behaviors.sidebarCollapse = {
     attach(context) {
-      $('.js-dropdown', context).click((e) => {
-        e.preventDefault();
-        setInitialHeights();
+      $(context)
+        .find('.js-dropdown')
+        .on('click', (e) => {
+          e.preventDefault();
+          setInitialHeights();
 
-        const clickedElement = $(e.currentTarget);
-        const $parent = clickedElement.parent().parent('.sub-dir');
-        let heightOffset = 0;
+          const clickedElement = $(e.currentTarget);
+          const $parent = clickedElement.parent().parent('.sub-dir');
+          let heightOffset = 0;
 
-        const $elem = $parent.children('ul').first();
-        const dataHeight = $elem.attr('data-height');
+          const $elem = $parent.children('ul').first();
+          const dataHeight = $elem.attr('data-height');
 
-        if ($parent.hasClass('collapsed')) {
-          $parent.removeClass('collapsed');
-          $elem.css('max-height', `${dataHeight}px`);
-          heightOffset = dataHeight;
-        }
-        else {
-          $parent.addClass('collapsed');
-          $elem.css('max-height', 0);
-          heightOffset = -dataHeight;
-        }
+          if ($parent.hasClass('collapsed')) {
+            $parent.removeClass('collapsed');
+            $elem.css('max-height', `${dataHeight}px`);
+            heightOffset = dataHeight;
+          }
+          else {
+            $parent.addClass('collapsed');
+            $elem.css('max-height', 0);
+            heightOffset = -dataHeight;
+          }
 
-        alterParentHeight($parent, heightOffset);
-      });
+          alterParentHeight($parent, heightOffset);
+        });
     },
   };
 })(jQuery, Drupal);
