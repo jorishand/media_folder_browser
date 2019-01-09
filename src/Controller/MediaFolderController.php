@@ -82,7 +82,9 @@ class MediaFolderController extends ControllerBase {
   protected $mediaStorage;
 
   /**
-   * @var Symfony\Component\HttpFoundation\RequestStack
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
    */
   private $requestStack;
 
@@ -101,6 +103,11 @@ class MediaFolderController extends ControllerBase {
    *   The renderer.
    * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
    *   The renderer.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request
+   *   The request stack.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystem $file_system, FolderStructureService $folder_structure_service, MediaHelperService $media_helper, Renderer $renderer, FormBuilderInterface $formBuilder, RequestStack $request) {
     $this->entityTypeManager = $entity_type_manager;
@@ -153,11 +160,11 @@ class MediaFolderController extends ControllerBase {
    *
    * @param int|null $folder_id
    *   ID of the folder or null for root.
-   * @param int $page
-   *   Curent page of results.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   Ajax response.
+   *
+   * @throws \Exception
    */
   public function refreshResults($folder_id = NULL) {
     $response = new AjaxResponse();
@@ -185,6 +192,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   Ajax response.
+   *
+   * @throws \Exception
    */
   public function getSearchResults($search_text) {
     $response = new AjaxResponse();
@@ -208,6 +217,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   Ajax response.
+   *
+   * @throws \Exception
    */
   public function refreshSidebar() {
     $response = new AjaxResponse();
@@ -399,6 +410,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An Ajax response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function addFolder(int $parent_id = NULL) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent_entity */
@@ -449,6 +462,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   A redirect response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function moveMedia(int $media_id, $folder_id) {
     $response = new AjaxResponse();
@@ -483,6 +498,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return bool
    *   Wether or not the operation was successful.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function moveMediaEntity(int $media_id, $folder_id) {
     /** @var \Drupal\media\Entity\Media $media */
@@ -530,6 +547,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An Ajax response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function moveMediaParent(int $media_id) {
     // Load media entity.
@@ -564,35 +583,41 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   A redirect response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function moveFolder(int $folder_id, $dest_folder_id) {
     $response = new AjaxResponse();
 
-    /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
-    if ($folder = $this->folderStorage->load($folder_id)) {
-      // Store current folder so it can be used in the refresh command.
-      $current_folder = $folder->get('parent')->referencedEntities();
-      if (empty($current_folder)) {
-        $current_folder_id = NULL;
+    $test = 'bla';
+    // Don't move folder to itself.
+    if ($folder_id != $dest_folder_id) {
+      /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
+      if ($folder = $this->folderStorage->load($folder_id)) {
+        // Store current folder so it can be used in the refresh command.
+        $current_folder = $folder->get('parent')->referencedEntities();
+        if (empty($current_folder)) {
+          $current_folder_id = NULL;
+        }
+        else {
+          $current_folder_id = $current_folder[0]->id();
+        }
+
+        // Save the old URI so that the empty folder can be removed afterwards.
+        $oldUri = $this->folderStructure->buildUri($folder);
+
+        // Change the parent of the folder.
+        $folder->set('parent', $dest_folder_id);
+        $folder->save();
+
+        // Update all children recursively.
+        if ($this->updateFolderChildren($folder_id)) {
+          // Remove the empty dir when all children have been moved.
+          $this->folderStructure->delTree($oldUri);
+        }
+
+        return $response->addCommand(new RefreshMFBCommand($current_folder_id, TRUE));
       }
-      else {
-        $current_folder_id = $current_folder[0]->id();
-      }
-
-      // Save the old URI so that the empty folder can be removed afterwards.
-      $oldUri = $this->folderStructure->buildUri($folder);
-
-      // Change the parent of the folder.
-      $folder->set('parent', $dest_folder_id);
-      $folder->save();
-
-      // Update all children recursively.
-      if ($this->updateFolderChildren($folder_id)) {
-        // Remove the empty dir when all children have been moved.
-        $this->folderStructure->delTree($oldUri);
-      }
-
-      return $response->addCommand(new RefreshMFBCommand($current_folder_id, TRUE));
     }
     // ToDo: error responses and watchdog warnings.
     return $response
@@ -607,6 +632,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An Ajax response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function moveFolderParent(int $folder_id) {
     // Load folder entity.
@@ -639,6 +666,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return bool
    *   Wether or not the operation was successful.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function updateFolderChildren(int $folder_id) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
@@ -698,6 +727,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An Ajax response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function renameFolder(int $folder_id, string $input) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
@@ -735,6 +766,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @param int $folder_id
    *   ID of the folder.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function recursiveDelete(int $folder_id = NULL) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */
@@ -769,6 +802,8 @@ class MediaFolderController extends ControllerBase {
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An AJAX response.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function removeMedia(int $media_id) {
     $entity = $this->mediaStorage->load($media_id);
