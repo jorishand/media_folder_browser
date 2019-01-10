@@ -84,8 +84,8 @@
      *
      * @param {number} sourceId
      *   ID of the entity that should be moved.
-     * @param {number} destId
-     *   ID of the destination folder entity.
+     * @param {number|null} destId
+     *   ID of the destination folder entity or null for root.
      * @param {string} type
      *   Wether the source entity is a "media" or "folder" entity.
      */

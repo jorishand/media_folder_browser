@@ -88,7 +88,7 @@ mfb.folder.move:
       folder_id:
         type: int
       dest_folder_id:
-        type: int
+        type: int|null
 
 mfb.folder.move_parent:
   path: '/media-folder-browser/folder/move-parent/{folder_id}'
@@ -137,7 +137,7 @@ mfb.media.move:
       media_id:
         type: int
       folder_id:
-        type: int
+        type: int|null
 
 mfb.media.move_parent:
   path: '/media-folder-browser/media/move-parent/{media_id}'

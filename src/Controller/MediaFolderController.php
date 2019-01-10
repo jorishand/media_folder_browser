@@ -509,7 +509,7 @@ class MediaFolderController extends ControllerBase {
    * @param int $media_id
    *   ID of the media entity.
    * @param int|null $folder_id
-   *   ID of the folder or null for root.
+   *   ID of the folder, null or 'root' for root.
    *
    * @return bool
    *   Wether or not the operation was successful.
@@ -591,9 +591,9 @@ class MediaFolderController extends ControllerBase {
   /**
    * Callback to move a folder entity to a different folder.
    *
-   * @param string $folder_id
+   * @param int $folder_id
    *   ID of the folder entity.
-   * @param string $dest_folder_id
+   * @param int|null $dest_folder_id
    *   ID of the folder or null for root.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
@@ -601,11 +601,14 @@ class MediaFolderController extends ControllerBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function moveFolder(string $folder_id, string $dest_folder_id) {
+  public function moveFolder(int $folder_id, $dest_folder_id) {
     $response = new AjaxResponse();
 
+    if ($dest_folder_id === 'null') {
+      $dest_folder_id = NULL;
+    }
     // Don't move root folder.
-    if ($folder_id !== 'root') {
+    if ($folder_id !== NULL) {
       // Don't move folder to itself.
       if ($folder_id !== $dest_folder_id) {
         /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */

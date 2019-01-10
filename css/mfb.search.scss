@@ -52,10 +52,10 @@
 
   &:focus {
     width: 100%;
-    border-color: $text-dark-blue;
+    border-color: $sidebar-back-color;
 
     ~ .search_field__button {
-      background: $text-dark-blue;
+      background: $sidebar-back-color;
       color: #fff;
 
       &::before {

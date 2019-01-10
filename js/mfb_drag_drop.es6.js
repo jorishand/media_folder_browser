@@ -38,9 +38,14 @@
       event.preventDefault();
       const type = event.dataTransfer.getData('type');
       const sourceId = event.dataTransfer.getData('id');
-      const destId = el.getAttribute('data-id');
+      let destId = el.getAttribute('data-id');
 
-      Drupal.mfbCommon.move(sourceId, destId, type);
+      if (sourceId !== destId && sourceId !== 'root' && sourceId) {
+        if (destId === 'root') {
+          destId = null;
+        }
+        Drupal.mfbCommon.move(sourceId, destId, type);
+      }
     },
   };
 })(jQuery, Drupal);

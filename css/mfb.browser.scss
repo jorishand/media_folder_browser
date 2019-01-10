@@ -319,7 +319,7 @@
   position: fixed;
   width: 120px;
   background-color: $white;
-  box-shadow: 0 4px 5px 3px $shadow-dark;
+  box-shadow: 0 4px 5px 3px $shadow-light;
   z-index: 3;
 }
 
@@ -341,6 +341,21 @@
       .sub-options {
         display: block;
       }
+    }
+  }
+
+  .option.linkoption {
+    padding: 0;
+  }
+
+  .option__link {
+    display: inline-block;
+    width: calc(100% - 40px);
+    padding: 10px 20px;
+    color: $sidebar-back-color;
+
+    &:hover {
+      text-decoration: none;
     }
   }
 }

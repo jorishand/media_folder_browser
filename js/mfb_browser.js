@@ -121,9 +121,11 @@
       var searchMedia = function searchMedia() {
         var $input = $('.js-search-text');
         var query = $input.val();
-        $('.js-current-folder').html(Drupal.t('Search results for "%search"', {
+        var $currentFolder = $('.js-current-folder');
+        $currentFolder.html(Drupal.t('Search results for "%search"', {
           '%search': query
         }));
+        $currentFolder.attr('data-id', '');
         $input.blur();
         $('.js-loader').removeClass('hidden');
         var endpoint = Drupal.url("media-folder-browser/search/".concat(query));

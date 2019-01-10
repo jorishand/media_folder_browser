@@ -58,11 +58,11 @@
 
 .search_field__text:focus {
   width: 100%;
-  border-color: #57677b;
+  border-color: #272c38;
 }
 
 .search_field__text:focus ~ .search_field__button {
-  background: #57677b;
+  background: #272c38;
   color: #fff;
 }
 

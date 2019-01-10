@@ -133,7 +133,9 @@
         const $input = $('.js-search-text');
         const query = $input.val();
 
-        $('.js-current-folder').html(Drupal.t('Search results for "%search"', { '%search': query }));
+        const $currentFolder = $('.js-current-folder');
+        $currentFolder.html(Drupal.t('Search results for "%search"', { '%search': query }));
+        $currentFolder.attr('data-id', '');
         $input.blur();
         $('.js-loader').removeClass('hidden');
 

@@ -31,52 +31,64 @@
       // Remove any old context menus from the DOM.
       $('.js-context-menu').remove();
 
-      // Build the context menu.;
-      const $menuWrapper = $(`<div class="folder-context-menu js-context-menu" style="left:${this.x}px;top:${this.y}px">`);
-      const $menu = $('<ul class="context-options">');
+      // Don't show context menu on root folder.
+      const targetId = this.target.attr('data-id');
+      if (targetId !== 'root') {
+        // Build the context menu.
+        const $menuWrapper = $(`<div class="folder-context-menu js-context-menu" style="left:${this.x}px;top:${this.y}px">`);
+        const $menu = $('<ul class="context-options">');
 
-      if (this.type === 'overview') {
-        $menu.append($(`<li class="option" data-action="add-folder">${Drupal.t('Add folder')}</li>`));
-        $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
-      }
-      else {
-        if (this.type === 'media') {
-          // The edit option is unique to media.
-          $menu.append($(`<li class="option" data-action="edit">${Drupal.t('Edit')}</li>`));
+        if (this.type === 'overview') {
+          $menu.append($(`<li class="option" data-action="add-folder">${Drupal.t('Add folder')}</li>`));
+          $menu.append($(`<li class="option" data-action="add-media">${Drupal.t('Add media')}</li>`));
         }
-
-        // If sibling folders are present or we are not in the root directory,
-        // add move option and build the folder list.
-        const $folders = $('.js-folder-item');
-        const currentFolder = $('.js-current-folder').attr('data-folder-id');
-
-        if ($folders[0] || currentFolder) {
-          const $moveAction = $(`<li class="option">${Drupal.t('Move to')}</li>`);
-          const $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
-
-          // Add 'move to parent' option.
-          if (currentFolder && currentFolder !== 'root') {
-            $folderList.append(`<li class="option" data-action="move-parent">${Drupal.t('Parent folder')}</li>`);
+        else {
+          if (this.type === 'media') {
+            // The edit option is unique to media.
+            const editUrl = Drupal.url(`media/${targetId}/edit`);
+            $menu.append($(`<li class="option linkoption" data-action="edit"><a class="option__link" href="${editUrl}" target="_blank">${Drupal.t('Edit')}</a></li>`));
+          }
+          else {
+            // The rename option is unique to folders.
+            $menu.append($(`<li class="option" data-action="rename">${Drupal.t('Rename')}</li>`));
           }
 
-          // Add move options for sibling folders.
-          $folders.each((index, elem) => {
-            const dataId = $(elem).attr('data-id');
-            const folderName = $(elem).find('.overview-item__folder__label').html();
-            $folderList.append(`<li class="option" data-action="move" data-id="${dataId}">${folderName}</li>`);
-          });
+          // If sibling folders are present or we are not in the root directory,
+          // add move option and build the folder list.
+          const $folders = $('.js-folder-item');
+          const currentFolder = $('.js-current-folder').attr('data-folder-id');
 
-          $menu.append($moveAction.append($folderList));
+          if ($folders[0] || currentFolder) {
+            const $moveAction = $(`<li class="option">${Drupal.t('Move to')}</li>`);
+            const $folderList = $('<ul class="context-options sub-options js-context-move-list"></ul>');
+
+            // Add 'move to parent' option.
+            if (currentFolder && currentFolder !== 'root') {
+              $folderList.append(`<li class="option" data-action="move-parent">${Drupal.t('Parent folder')}</li>`);
+            }
+
+            // Add move options for sibling folders.
+            $folders.each((index, elem) => {
+              const dataId = $(elem).attr('data-id');
+
+              // Don't add option to move folder to itself.
+              if (dataId !== targetId) {
+                const folderName = $(elem).find('.overview-item__folder__label').html();
+                $folderList.append(`<li class="option" data-action="move" data-id="${dataId}">${folderName}</li>`);
+              }
+            });
+
+            $menu.append($moveAction.append($folderList));
+          }
+          $menu.append($(`<li class="option" data-action="delete">${Drupal.t('Delete')}</li>`));
         }
-        $menu.append($(`<li class="option" data-action="rename">${Drupal.t('Rename')}</li>`));
-        $menu.append($(`<li class="option" data-action="delete">${Drupal.t('Delete')}</li>`));
+
+        $('.js-media-folder-browser').append($menuWrapper.append($menu));
+
+        $menu.find('[data-action]').each((index, elem) => {
+          elem.addEventListener('click', () => this.actionHandler($(elem)));
+        });
       }
-
-      $('.js-media-folder-browser').append($menuWrapper.append($menu));
-
-      $menu.find('[data-action]').each((index, elem) => {
-        elem.addEventListener('click', () => this.actionHandler($(elem)));
-      });
     }
 
     actionHandler(elem) {

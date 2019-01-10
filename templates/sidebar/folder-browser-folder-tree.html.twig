@@ -1,7 +1,7 @@
 <ul class="mfb-sidebar__list js-sidebar">
   <li class="mfb-sidebar__list-item">
     <div class="mfb-sidebar__list-item__folder">
-      <a href="#" class="menu-link root js-tree-item selected" data-id="root">
+      <a href="#" class="menu-link root js-tree-item selected" draggable="false" ondrop="Drupal.mfbDragDrop.onDropHandler(event, this)" ondragover="Drupal.mfbDragDrop.onDragOverHandler(event)" data-id="root">
         <i class="folder-icon"></i>
         <span class="menu-link__title">{{ 'Root'|t }}</span>
       </a>

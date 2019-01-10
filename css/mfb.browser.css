@@ -408,8 +408,8 @@
   position: fixed;
   width: 120px;
   background-color: #fff;
-  -webkit-box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.3);
-          box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.1);
   z-index: 3;
 }
 
@@ -433,6 +433,21 @@
 
 .context-options .option:hover .sub-options {
   display: block;
+}
+
+.context-options .option.linkoption {
+  padding: 0;
+}
+
+.context-options .option__link {
+  display: inline-block;
+  width: calc(100% - 40px);
+  padding: 10px 20px;
+  color: #272c38;
+}
+
+.context-options .option__link:hover {
+  text-decoration: none;
 }
 
 .sub-options {

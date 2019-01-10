@@ -42,7 +42,14 @@
       var type = event.dataTransfer.getData('type');
       var sourceId = event.dataTransfer.getData('id');
       var destId = el.getAttribute('data-id');
-      Drupal.mfbCommon.move(sourceId, destId, type);
+
+      if (sourceId !== destId && sourceId !== 'root' && sourceId) {
+        if (destId === 'root') {
+          destId = null;
+        }
+
+        Drupal.mfbCommon.move(sourceId, destId, type);
+      }
     }
   };
 })(jQuery, Drupal);
