@@ -197,6 +197,7 @@
   &__media {
     transition: box-shadow 0.2s ease-in-out;
     border-radius: 15px;
+    background-color: $white;
     box-shadow: 0 4px 8px 0 $shadow-light;
 
     &.focused,
@@ -366,7 +367,7 @@
   top: 23px;
   left: 110px;
   background-color: $white;
-  box-shadow: 0 4px 5px 3px $shadow-dark;
+  box-shadow: 0 4px 5px 3px $shadow-light;
 }
 
 // Loader:

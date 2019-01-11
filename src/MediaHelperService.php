@@ -30,6 +30,9 @@ class MediaHelperService {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
@@ -44,6 +47,8 @@ class MediaHelperService {
    *
    * @return \Drupal\file\Entity\File|bool
    *   Returns the referenced file, if no file was found, return FALSE.
+   *
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function getMediaFile(Media $media) {
     // ToDo: Maybe replace with config form? Check what the best solution is.
@@ -87,10 +92,11 @@ class MediaHelperService {
   public function getRootMedia() {
     $nids = \Drupal::entityQuery('media')
       ->notExists('field_parent_folder')
-      ->sort('name', 'ASC')
       ->execute();
 
-    return $this->mediaStorage->loadMultiple($nids);
+    $entities = $this->mediaStorage->loadMultiple($nids);
+    uasort($entities, [$this, 'sortByName']);
+    return $entities;
   }
 
   /**
@@ -105,14 +111,14 @@ class MediaHelperService {
   public function getSearchMedia(string $search_text) {
     $nids = \Drupal::entityQuery('media')
       ->condition('name', '%' . $search_text . '%', 'like')
-      ->sort('name', 'ASC')
       ->execute();
-
-    return $this->mediaStorage->loadMultiple($nids);
+    $entities = $this->mediaStorage->loadMultiple($nids);
+    uasort($entities, [$this, 'sortByName']);
+    return $entities;
   }
 
   /**
-   * Compare function to sort media entities by name.
+   * Compare function to sort media entities by name in a natural order.
    *
    * @param \Drupal\media\Entity\Media $a
    *   Folder entity a.
@@ -123,7 +129,7 @@ class MediaHelperService {
    *   The children.
    */
   private function sortByName(Media $a, Media $b) {
-    return strcmp($a->get('name')->value, $b->get('name')->value);
+    return strnatcmp($a->get('name')->value, $b->get('name')->value);
   }
 
 }

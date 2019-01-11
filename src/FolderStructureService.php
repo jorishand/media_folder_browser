@@ -32,16 +32,20 @@ class FolderStructureService {
    *
    * @return array
    *   The folders.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function getRootFolders() {
     $storage = $this->entityTypeManager->getStorage('folder_entity');
 
     $nids = \Drupal::entityQuery('folder_entity')
       ->notExists('parent')
-      ->sort('name', 'ASC')
       ->execute();
 
-    return $storage->loadMultiple($nids);
+    $entities = $storage->loadMultiple($nids);
+    uasort($entities, [$this, 'sortByName']);
+    return $entities;
   }
 
   /**
@@ -52,27 +56,15 @@ class FolderStructureService {
    *
    * @return array
    *   The children.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function getFolderChildren(FolderEntity $folder) {
     $storage = $this->entityTypeManager->getStorage('folder_entity');
     $entities = $storage->loadByProperties(['parent' => $folder->id()]);
     uasort($entities, [$this, 'sortByName']);
     return $entities;
-  }
-
-  /**
-   * Compare function to sort folder entities by name.
-   *
-   * @param \Drupal\media_folder_browser\Entity\FolderEntity $a
-   *   Folder entity a.
-   * @param \Drupal\media_folder_browser\Entity\FolderEntity $b
-   *   Folder entity b.
-   *
-   * @return array
-   *   The children.
-   */
-  private function sortByName(FolderEntity $a, FolderEntity $b) {
-    return strcmp($a->get('name')->value, $b->get('name')->value);
   }
 
   /**
@@ -102,6 +94,9 @@ class FolderStructureService {
    *
    * @return string
    *   The URI.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function buildUri(FolderEntity $folderEntity, string $uri = '') {
     $uri = empty($uri) ? '' : '/' . $uri;
@@ -116,6 +111,21 @@ class FolderStructureService {
     }
 
     return 'public://' . $uri;
+  }
+
+  /**
+   * Compare function to sort folder entities by name in a natural order.
+   *
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $a
+   *   Folder entity a.
+   * @param \Drupal\media_folder_browser\Entity\FolderEntity $b
+   *   Folder entity b.
+   *
+   * @return array
+   *   The children.
+   */
+  private function sortByName(FolderEntity $a, FolderEntity $b) {
+    return strnatcmp($a->get('name')->value, $b->get('name')->value);
   }
 
 }
