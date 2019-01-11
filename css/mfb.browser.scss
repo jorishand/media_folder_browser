@@ -391,10 +391,10 @@
   display: inline-block;
   padding: 5px 25px;
   transition: all 0.1s ease-in-out;
-  border: solid 1px $text-dark-blue;
+  border: solid 1px $sidebar-back-color;
   border-radius: 15px;
   background-color: $white;
-  color: $text-dark-blue;
+  color: $sidebar-back-color;
   font-size: 15px;
   line-height: normal;
   text-align: center;
@@ -402,7 +402,7 @@
 
   &:hover,
   &:focus {
-    background-color: $text-dark-blue;
+    background-color: $sidebar-back-color;
     color: $white;
   }
 }

@@ -162,19 +162,26 @@
     attach: function attach(context) {
       $(context).find('.js-mfb-pager-item').on('click', function (e) {
         e.preventDefault();
-        var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
 
-        if (typeof id === 'undefined' || id === null || id === 'root') {
-          id = '';
+        if (!e.currentTarget.classList.contains('active')) {
+          var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
+
+          if (typeof id === 'undefined' || id === null || id === 'root') {
+            id = '';
+          }
+
+          var page = $(e.currentTarget).attr('data-page');
+          var focusItem = [];
+
+          if (typeof page !== 'undefined') {
+            focusItem = {
+              type: 'page',
+              id: page
+            };
+          }
+
+          Drupal.mfbCommon.reload(id, false, focusItem);
         }
-
-        var page = $(e.currentTarget).attr('data-page');
-
-        if (typeof page === 'undefined') {
-          page = null;
-        }
-
-        Drupal.mfbCommon.reload(id, false, page);
       });
     }
   };

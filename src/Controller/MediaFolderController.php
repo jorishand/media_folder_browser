@@ -153,6 +153,10 @@ class MediaFolderController extends ControllerBase {
    *
    * @return array
    *   A render array.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function renderBrowser() {
     $children = $this->getFolderContents();
@@ -183,9 +187,11 @@ class MediaFolderController extends ControllerBase {
 
     $children = $this->getFolderContents($folder_id);
 
-    $page = $this->requestStack->getCurrentRequest()->query->get('page');
+    $focusItem = [];
+    $focusItem['type'] = $this->requestStack->getCurrentRequest()->query->get('focusitem_type');
+    $focusItem['id'] = $this->requestStack->getCurrentRequest()->query->get('focusitem_id');
 
-    $results = $this->renderOverview($children['folders'], $children['media'], $page);
+    $results = $this->renderOverview($children['folders'], $children['media'], $focusItem);
     $results = $this->renderer->render($results);
 
     $response->addCommand(new ReplaceCommand('.js-results-wrapper', $results));
@@ -251,6 +257,9 @@ class MediaFolderController extends ControllerBase {
    *
    * @return array
    *   Array containing child folders and media.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function getFolderContents(int $folder_id = NULL) {
     $folder_entity = NULL;
@@ -281,18 +290,18 @@ class MediaFolderController extends ControllerBase {
    *   Array of folder entities.
    * @param array $media
    *   Array of media entities.
-   * @param int $page
-   *   The current page.
+   * @param array $focusItem
+   *   Associative array containing:
+   *   - type: type of item to focus ('media', 'folder' or 'page')
+   *   - id: id of the item, or page number.
    *
    * @return array
    *   A render array.
+   *
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  public function renderOverview(array $folders = [], array $media = [], $page = 1) {
+  public function renderOverview(array $folders = [], array $media = [], array $focusItem = []) {
     $results = [];
-
-    if (!$page) {
-      $page = 1;
-    }
 
     // Add child folders to results.
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
@@ -301,6 +310,7 @@ class MediaFolderController extends ControllerBase {
         '#theme' => 'folder_browser_folder_item',
         '#id' => $folder->id(),
         '#name' => $folder->getName(),
+        'type' => 'folder',
       ];
     }
 
@@ -343,6 +353,7 @@ class MediaFolderController extends ControllerBase {
         '#size' => format_size($size),
         '#type' => $type,
         '#thumbnail' => $thumbnail,
+        'type' => 'media',
       ];
     }
 
@@ -352,16 +363,36 @@ class MediaFolderController extends ControllerBase {
 
     pager_default_initialize(count($results), $per_page);
 
+    // Split results in different chunks (pages).
     $chunks = array_chunk($results, $per_page, TRUE);
+
+    // Determine which page should be active.
+    $focusPage = 1;
+    if ($focusItem['type'] === 'media' || $focusItem['type'] === 'folder') {
+      foreach ($chunks as $page => $items) {
+        foreach ($items as $entity) {
+          if ($entity['#id'] === $focusItem['id'] || $entity['type'] === $focusItem['type']) {
+            $focusPage = $page + 1;
+          }
+        }
+      }
+    }
+    elseif ($focusItem['type'] === 'page') {
+      $focusPage = $focusItem['id'];
+    }
+    else {
+      $focusPage = 1;
+    }
+
     $render = [
       '#theme' => 'folder_browser_folder_results',
-      '#results' => $chunks[$page - 1],
-      '#count' => count($chunks[$page - 1]),
+      '#results' => $chunks[$focusPage - 1],
+      '#count' => count($chunks[$focusPage - 1]),
       '#total' => count($results),
       '#pager' => [
         '#theme' => 'folder_browser_pager',
         '#pages' => count($chunks),
-        '#current_page' => $page,
+        '#current_page' => $focusPage,
       ],
     ];
 
@@ -373,6 +404,9 @@ class MediaFolderController extends ControllerBase {
    *
    * @return array
    *   A render array.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function getFolderTree() {
     // Load first level folders.
@@ -397,6 +431,9 @@ class MediaFolderController extends ControllerBase {
    *
    * @return array
    *   A render array.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function getFolderTreeItem(FolderEntity $folder) {
     $child_folders = $this->folderStructure->getFolderChildren($folder);
@@ -424,6 +461,8 @@ class MediaFolderController extends ControllerBase {
    *   An Ajax response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function addFolder(int $parent_id = NULL) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $parent_entity */
@@ -460,8 +499,13 @@ class MediaFolderController extends ControllerBase {
     $uri = $this->folderStructure->buildUri($folder_entity);
     $this->fileSystem->mkdir($uri, NULL, TRUE);
 
+    $focusItem = [
+      'type' => 'folder',
+      'id' => $folder_entity->id(),
+    ];
+
     $response = new AjaxResponse();
-    return $response->addCommand(new RefreshMFBCommand($parent_id, TRUE));
+    return $response->addCommand(new RefreshMFBCommand($parent_id, TRUE, $focusItem));
   }
 
   /**
@@ -476,6 +520,9 @@ class MediaFolderController extends ControllerBase {
    *   A redirect response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function moveMedia(int $media_id, $folder_id) {
     $response = new AjaxResponse();
@@ -515,6 +562,9 @@ class MediaFolderController extends ControllerBase {
    *   Wether or not the operation was successful.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   private function moveMediaEntity(int $media_id, $folder_id) {
     /** @var \Drupal\media\Entity\Media $media */
@@ -564,6 +614,9 @@ class MediaFolderController extends ControllerBase {
    *   An Ajax response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function moveMediaParent(int $media_id) {
     // Load media entity.
@@ -600,6 +653,9 @@ class MediaFolderController extends ControllerBase {
    *   A redirect response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function moveFolder(int $folder_id, $dest_folder_id) {
     $response = new AjaxResponse();
@@ -664,6 +720,9 @@ class MediaFolderController extends ControllerBase {
    *   An Ajax response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function moveFolderParent(int $folder_id) {
     // Load folder entity.
@@ -698,6 +757,9 @@ class MediaFolderController extends ControllerBase {
    *   Wether or not the operation was successful.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   private function updateFolderChildren(int $folder_id) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
@@ -731,6 +793,8 @@ class MediaFolderController extends ControllerBase {
    *   An Ajax response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function removeFolder(int $folder_id = NULL) {
     $entity = $this->folderStorage->load($folder_id);
@@ -761,6 +825,9 @@ class MediaFolderController extends ControllerBase {
    *   An Ajax response.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function renameFolder(int $folder_id, string $input) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder */
@@ -800,6 +867,8 @@ class MediaFolderController extends ControllerBase {
    *   ID of the folder.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   private function recursiveDelete(int $folder_id = NULL) {
     /** @var \Drupal\media_folder_browser\Entity\FolderEntity $folder_entity */

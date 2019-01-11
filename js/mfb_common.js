@@ -14,24 +14,28 @@
      *   overview.
      * @param {boolean} sidebar
      *   Wether or not the sidebar should be refreshed.
-     * @param {number|null} page
-     *   The current page.
+     * @param {array} focusItem
+     *   Associative array containing:
+     *   - type: type of item to focus ('media', 'folder' or 'page')
+     *   - id: id of the item, or page number.
      */
     reload: function reload(id) {
       var sidebar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      var page = arguments.length > 2 ? arguments[2] : undefined;
+      var focusItem = arguments.length > 2 ? arguments[2] : undefined;
       $('.js-loader').removeClass('hidden'); // If the id is not defined, replace it with an  empty string.
 
       if (typeof id === 'undefined' || id === null) {
         id = '';
       }
 
-      if (typeof page === 'undefined' || page === null) {
-        page = '';
+      var focusQueryParam = '';
+
+      if (typeof focusItem.type !== 'undefined' && typeof focusItem.id !== 'undefined') {
+        focusQueryParam = "?focusitem.type=".concat(focusItem.type, "&focusitem.id=").concat(focusItem.id);
       } // Refresh overview
 
 
-      var endpoint = Drupal.url("media-folder-browser/overview/refresh".concat(id ? '/' : '').concat(id).concat(page ? '?page=' : '').concat(page));
+      var endpoint = Drupal.url("media-folder-browser/overview/refresh".concat(id ? '/' : '').concat(id).concat(focusQueryParam));
       Drupal.ajax({
         url: endpoint
       }).execute();

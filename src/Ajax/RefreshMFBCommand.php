@@ -24,16 +24,28 @@ class RefreshMFBCommand implements CommandInterface {
   protected $reloadSidebar;
 
   /**
+   * Item to focus after refreshing.
+   *
+   * @var array
+   */
+  protected $focusItem;
+
+  /**
    * Constructs a RefreshMFBCommand object.
    *
    * @param int|null $folderId
    *   The ID of the folder to refresh.
    * @param bool $reloadSidebar
    *   Wether or not to refresh the sidebar.
+   * @param array $focusItem
+   *   Associative array containing:
+   *   - type: type of item to focus ('media', 'folder' or 'page')
+   *   - id: id of the item, or page number.
    */
-  public function __construct($folderId, $reloadSidebar = FALSE) {
+  public function __construct($folderId = NULL, bool $reloadSidebar = FALSE, array $focusItem = []) {
     $this->folderId = $folderId;
     $this->reloadSidebar = $reloadSidebar;
+    $this->focusItem = $focusItem;
   }
 
   /**
@@ -47,6 +59,7 @@ class RefreshMFBCommand implements CommandInterface {
       'command' => 'mfbRefresh',
       'folderId' => $this->folderId,
       'reloadSidebar' => $this->reloadSidebar,
+      'focusItem' => $this->focusItem,
     ];
   }
 
