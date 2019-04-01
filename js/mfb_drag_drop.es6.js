@@ -40,7 +40,7 @@
       const sourceId = event.dataTransfer.getData('id');
       let destId = el.getAttribute('data-id');
 
-      if (sourceId !== destId && sourceId !== 'root' && sourceId) {
+      if (sourceId !== destId && sourceId && sourceId !== 'root') {
         if (destId === 'root') {
           destId = null;
         }

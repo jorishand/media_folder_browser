@@ -21,12 +21,13 @@
     reload: (id, sidebar = false, focusItem) => {
       $('.js-loader').removeClass('hidden');
       // If the id is not defined, replace it with an  empty string.
-      if (typeof id === 'undefined' || id === null) {
+      if (!id) {
         id = '';
       }
 
       let focusQueryParam = '';
-      if (typeof focusItem.type !== 'undefined' && typeof focusItem.id !== 'undefined') {
+
+      if(focusItem && focusItem.id && focusItem.type) {
         focusQueryParam = `?focusitem.type=${focusItem.type}&focusitem.id=${focusItem.id}`;
       }
 
@@ -47,7 +48,7 @@
       $('.js-loader').removeClass('hidden');
       let id = $('.js-current-folder').attr('data-folder-id');
       // If the id is not defined, replace it with an  empty string.
-      if (typeof id === 'undefined' || id === null || id === 'root') {
+      if (!id || id === 'root') {
         id = '';
       }
       const endpoint = Drupal.url(`media-folder-browser/folder/add/${id}`);
@@ -60,7 +61,7 @@
       $('.js-loader').removeClass('hidden');
       let id = $('.js-current-folder').attr('data-folder-id');
       // If the id is not defined, replace it with an  empty string.
-      if (typeof id === 'undefined' || id === null || id === 'root') {
+      if (!id || id === 'root') {
         id = '';
       }
       const endpoint = Drupal.url(`media-folder-browser/media/add/${id}`);

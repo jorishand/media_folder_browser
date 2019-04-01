@@ -24,13 +24,13 @@
       var focusItem = arguments.length > 2 ? arguments[2] : undefined;
       $('.js-loader').removeClass('hidden'); // If the id is not defined, replace it with an  empty string.
 
-      if (typeof id === 'undefined' || id === null) {
+      if (!id) {
         id = '';
       }
 
       var focusQueryParam = '';
 
-      if (typeof focusItem.type !== 'undefined' && typeof focusItem.id !== 'undefined') {
+      if (focusItem && focusItem.id && focusItem.type) {
         focusQueryParam = "?focusitem.type=".concat(focusItem.type, "&focusitem.id=").concat(focusItem.id);
       } // Refresh overview
 
@@ -56,7 +56,7 @@
       $('.js-loader').removeClass('hidden');
       var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
 
-      if (typeof id === 'undefined' || id === null || id === 'root') {
+      if (!id || id === 'root') {
         id = '';
       }
 
@@ -73,7 +73,7 @@
       $('.js-loader').removeClass('hidden');
       var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
 
-      if (typeof id === 'undefined' || id === null || id === 'root') {
+      if (!id || id === 'root') {
         id = '';
       }
 
