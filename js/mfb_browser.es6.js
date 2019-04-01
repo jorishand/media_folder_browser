@@ -56,6 +56,7 @@
         .find('.js-submit-selected')
         .on('click', (e) => {
           e.preventDefault();
+
           const clickedElement = $(e.currentTarget);
           const widgetId = clickedElement.closest('.folder-browser-widget').attr('data-widget-id');
 
@@ -179,12 +180,12 @@
           e.preventDefault();
           if (!e.currentTarget.classList.contains('active')) {
             let id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
-            if (typeof id === 'undefined' || id === null || id === 'root') {
+            if (!id || id === 'root') {
               id = '';
             }
             const page = $(e.currentTarget).attr('data-page');
             let focusItem = [];
-            if (typeof page !== 'undefined') {
+            if (page) {
               focusItem = {
                 type: 'page',
                 id: page,

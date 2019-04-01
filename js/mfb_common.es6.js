@@ -27,7 +27,7 @@
 
       let focusQueryParam = '';
 
-      if(focusItem && focusItem.id && focusItem.type) {
+      if (focusItem && focusItem.id && focusItem.type) {
         focusQueryParam = `?focusitem.type=${focusItem.type}&focusitem.id=${focusItem.id}`;
       }
 

@@ -166,14 +166,14 @@
         if (!e.currentTarget.classList.contains('active')) {
           var id = $('.js-current-folder').attr('data-folder-id'); // If the id is not defined, replace it with an  empty string.
 
-          if (typeof id === 'undefined' || id === null || id === 'root') {
+          if (!id || id === 'root') {
             id = '';
           }
 
           var page = $(e.currentTarget).attr('data-page');
           var focusItem = [];
 
-          if (typeof page !== 'undefined') {
+          if (page) {
             focusItem = {
               type: 'page',
               id: page
