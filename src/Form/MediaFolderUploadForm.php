@@ -367,7 +367,11 @@ class MediaFolderUploadForm extends FormBase {
     $trigger = $form_state->getTriggeringElement();
     $response = new AjaxResponse();
     if ($trigger['#name'] !== 'cancel') {
-      $response->addCommand(new RefreshMFBCommand($this->folderId));
+      $focusItem = [
+        'type' => 'media',
+        'id' => end($this->media)->id(),
+      ];
+      $response->addCommand(new RefreshMFBCommand($this->folderId, FALSE, $focusItem));
     }
     $response->addCommand(new RemoveCommand('#media-library-upload-wrapper'));
     $response->addCommand(new InvokeCommand('.js-upload-wrapper, .js-loader', "addClass", ['hidden']));
